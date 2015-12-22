@@ -1,0 +1,2 @@
+EXPORTS
+create_instance = ?create_instance@module_api@@YA?AV?$HeapPtr@VIMethod@module_api@@@1@ABV?$HeapPtr@VISystem@module_api@@@1@@Z
