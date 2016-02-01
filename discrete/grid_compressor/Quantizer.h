@@ -22,6 +22,6 @@ namespace grid_compressor
 	public:
 		Quantizer( double left, double right );
 
-		Quantization quantize( int quant_count, double max_error, const grid_generator::IDistribution &distribution ) const;
+		Quantization quantize( int quant_count, double max_error, const distributions::IDistribution &distribution ) const;
 	};
 }

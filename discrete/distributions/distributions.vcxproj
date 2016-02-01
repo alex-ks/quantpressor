@@ -19,10 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{EA73E99B-878E-454D-AC6D-048302CCB1C9}</ProjectGuid>
-    <RootNamespace>table_generator</RootNamespace>
+    <ProjectGuid>{A191243A-D319-46EC-849B-508DF5B87323}</ProjectGuid>
+    <RootNamespace>distributions</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
-    <ProjectName>grid_generator</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -36,7 +35,7 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -70,20 +69,18 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>..\..\Include;$(VC_IncludePath);$(WindowsSDK_IncludePath);..\distributions</IncludePath>
+    <IncludePath>..\..\Include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>..\..\Include;$(VC_IncludePath);$(WindowsSDK_IncludePath);..\distributions</IncludePath>
+    <IncludePath>..\..\Include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
-    <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -91,9 +88,6 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
-    <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -102,9 +96,9 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
@@ -118,24 +112,24 @@
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="lib.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\..\Include\exception.cpp" />
-    <ClCompile Include="..\..\Include\RoughGrid.cpp" />
-    <ClCompile Include="..\..\Include\RoughMetadata.cpp" />
-    <ClCompile Include="lib.cpp" />
+    <ClCompile Include="EmpiricalDistribution.cpp" />
+    <ClCompile Include="ExponentialDistribution.cpp" />
+    <ClCompile Include="TrapezoidalIntegrator.cpp" />
+    <ClCompile Include="NormalDistribution.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\distributions\distributions.vcxproj">
-      <Project>{a191243a-d319-46ec-849b-508df5b87323}</Project>
-    </ProjectReference>
+    <ClInclude Include="EmpiricalDistribution.h" />
+    <ClInclude Include="ExponentialDistribution.h" />
+    <ClInclude Include="TrapezoidalIntegrator.h" />
+    <ClInclude Include="IDistribution.h" />
+    <ClInclude Include="IIntegrator.h" />
+    <ClInclude Include="NormalDistribution.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

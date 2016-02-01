@@ -18,7 +18,7 @@ grid_compressor::Quantizer::Quantizer( double left, double right )
 	R = right;
 }
 
-grid_compressor::Quantization grid_compressor::Quantizer::quantize( int quant_count, double max_error, const grid_generator::IDistribution & distribution ) const
+grid_compressor::Quantization grid_compressor::Quantizer::quantize( int quant_count, double max_error, const distributions::IDistribution & distribution ) const
 {
 	Quantization q( quant_count );
 

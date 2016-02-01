@@ -69,10 +69,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>..\table_generator;C:\Repository\Github\cocainum_modules\Include;$(IncludePath)</IncludePath>
+    <IncludePath>..\table_generator;..\distributions;C:\Repository\Github\cocainum_modules\Include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>..\table_generator;..\..\Include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>..\table_generator;..\distributions;..\..\Include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -136,11 +136,6 @@
     <ClInclude Include="utilities.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\table_generator\table_generator.vcxproj">
-      <Project>{ea73e99b-878e-454d-ac6d-048302ccb1c9}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\..\Include\RoughGrid.cpp" />
     <ClCompile Include="..\..\Include\RoughMetadata.cpp" />
     <ClCompile Include="ModularArithmeticCompressor.cpp" />
@@ -148,6 +143,11 @@
     <ClCompile Include="FileOutputStream.cpp" />
     <ClCompile Include="HuffmanCompressor.cpp" />
     <ClCompile Include="Quantizer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\distributions\distributions.vcxproj">
+      <Project>{a191243a-d319-46ec-849b-508df5b87323}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

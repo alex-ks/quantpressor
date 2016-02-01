@@ -1,10 +1,10 @@
 #pragma once
 
-#include "lib.h"
+#include "IDistribution.h"
 
 #include <random>
 
-namespace grid_generator
+namespace distributions
 {
 	class ExponentialDistribution : public IDistribution
 	{
@@ -16,11 +16,11 @@ namespace grid_generator
 	public:
 		ExponentialDistribution( double lambda );
 
-		virtual double generate( ) override;
+		double generate( ) override;
 
-		virtual double operator()( double x ) const override;
+		double operator()( double x ) const override;
 
-		virtual double expectation( ) const override;
-		virtual double expectation( double a, double b ) const override;
+		double expectation( ) const override;
+		double expectation( double a, double b ) const override;
 	};
 }

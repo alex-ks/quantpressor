@@ -69,10 +69,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>..\table_generator;C:\Repository\Github\cocainum_modules\Include;..\grid_compressor;$(IncludePath)</IncludePath>
+    <IncludePath>..\table_generator;..\distributions;C:\Repository\Github\cocainum_modules\Include;..\grid_compressor;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>..\table_generator;..\..\Include;..\grid_compressor;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>..\table_generator;..\distributions;..\..\Include;..\grid_compressor;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -127,6 +127,9 @@
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\distributions\distributions.vcxproj">
+      <Project>{a191243a-d319-46ec-849b-508df5b87323}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\grid_compressor\grid_compressor.vcxproj">
       <Project>{33e2d4f9-d6fe-43de-a2a6-fc751fd3bb0f}</Project>
     </ProjectReference>

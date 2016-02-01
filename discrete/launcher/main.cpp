@@ -15,6 +15,7 @@
 
 using namespace std;
 using namespace module_api;
+using namespace distributions;
 using namespace grid_generator;
 using namespace grid_compressor;
 
@@ -97,7 +98,54 @@ int main_io( )
 
 using time::Timer;
 
+#include <IIntegrator.h>
+#include <TrapezoidalIntegrator.h>
+
+using namespace integrators;
+
+int main_integrate( )
+{
+	auto integrator = TrapezoidalIntegrator( 1e-4 );
+
+	double result = integrator.integrate( []( double x ) { return x; }, 0.0, 6.0 );
+	cout << result << endl;
+
+	system( "pause" );
+
+	return 0;
+}
+
+#include <EmpiricalDistribution.h>
+#include <cmath>
+
 int main( )
+{
+	vector<pIDistribution> distrs = { make_heap_aware<NormalDistribution>( 0, 1 ) };
+
+	auto grid = generate_grid( ROW_COUNT, distrs );
+
+	double min = numeric_limits<double>::max( ),
+		max = numeric_limits<double>::min( );
+
+	for ( int i = 0; i < ROW_COUNT; ++i )
+	{
+		min = min < grid->get_value( i, 0 ) ? min : grid->get_value( i, 0 );
+		max = max > grid->get_value( i, 0 ) ? max : grid->get_value( i, 0 );
+	}
+
+	double k = 1.0 / sqrt( 2 * _Pi );
+
+	ApproximationMethod method = { [k]( double r ) { return k * exp( -0.5 * r * r ); }, 0.35 };
+
+	auto empirical = EmpiricalDistribution( grid, 0, method, min, max, 1e-2 );
+
+	cout << "Alpha = " << empirical.expectation( ) << endl;
+	cout << "Sigma = " << empirical.deviation( ) << endl;
+
+	system( "pause" );
+}
+
+int main_archive( )
 {
 	vector<pIDistribution> distrs = { make_heap_aware<NormalDistribution>( 0, 1 ), make_heap_aware<NormalDistribution>( 2, 4 ) };
 

@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "launcher", "launcher\launch
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "grid_compressor", "grid_compressor\grid_compressor.vcxproj", "{33E2D4F9-D6FE-43DE-A2A6-FC751FD3BB0F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "distributions", "distributions\distributions.vcxproj", "{A191243A-D319-46EC-849B-508DF5B87323}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -41,6 +43,14 @@ Global
 		{33E2D4F9-D6FE-43DE-A2A6-FC751FD3BB0F}.Release|x64.Build.0 = Release|x64
 		{33E2D4F9-D6FE-43DE-A2A6-FC751FD3BB0F}.Release|x86.ActiveCfg = Release|Win32
 		{33E2D4F9-D6FE-43DE-A2A6-FC751FD3BB0F}.Release|x86.Build.0 = Release|Win32
+		{A191243A-D319-46EC-849B-508DF5B87323}.Debug|x64.ActiveCfg = Debug|x64
+		{A191243A-D319-46EC-849B-508DF5B87323}.Debug|x64.Build.0 = Debug|x64
+		{A191243A-D319-46EC-849B-508DF5B87323}.Debug|x86.ActiveCfg = Debug|Win32
+		{A191243A-D319-46EC-849B-508DF5B87323}.Debug|x86.Build.0 = Debug|Win32
+		{A191243A-D319-46EC-849B-508DF5B87323}.Release|x64.ActiveCfg = Release|x64
+		{A191243A-D319-46EC-849B-508DF5B87323}.Release|x64.Build.0 = Release|x64
+		{A191243A-D319-46EC-849B-508DF5B87323}.Release|x86.ActiveCfg = Release|Win32
+		{A191243A-D319-46EC-849B-508DF5B87323}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
