@@ -19,19 +19,19 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{69AA8274-87DC-41E1-8104-08D4071D3D25}</ProjectGuid>
-    <RootNamespace>launcher</RootNamespace>
+    <ProjectGuid>{859315A3-F76B-422F-9C78-E2A58223D83E}</ProjectGuid>
+    <RootNamespace>csv_reader</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -69,10 +69,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>..\csv_reader;..\table_generator;..\distributions;C:\Repository\Github\cocainum_modules\Include;..\grid_compressor;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\Include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>..\csv_reader;..\table_generator;..\distributions;..\..\Include;..\grid_compressor;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>..\..\Include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -80,9 +80,6 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
-    <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -90,9 +87,6 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
-    <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -103,7 +97,6 @@
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
@@ -117,39 +110,17 @@
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="Timer.cpp" />
+    <ClInclude Include="CsvReader.h" />
+    <ClInclude Include="IInputReader.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\csv_reader\csv_reader.vcxproj">
-      <Project>{859315a3-f76b-422f-9c78-e2a58223d83e}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\distributions\distributions.vcxproj">
-      <Project>{a191243a-d319-46ec-849b-508df5b87323}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\grid_compressor\grid_compressor.vcxproj">
-      <Project>{33e2d4f9-d6fe-43de-a2a6-fc751fd3bb0f}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\table_generator\table_generator.vcxproj">
-      <Project>{ea73e99b-878e-454d-ac6d-048302ccb1c9}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="grid.csv" />
-    <Text Include="output.txt" />
-    <Text Include="test.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="decompressed.csv" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Timer.h" />
+    <ClCompile Include="..\..\Include\RoughGrid.cpp" />
+    <ClCompile Include="CsvReader.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

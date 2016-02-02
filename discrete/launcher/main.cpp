@@ -118,9 +118,9 @@ int main_integrate( )
 #include <EmpiricalDistribution.h>
 #include <cmath>
 
-int main( )
+int main_distr_replicate( )
 {
-	vector<pIDistribution> distrs = { make_heap_aware<NormalDistribution>( 0, 1 ) };
+	vector<pIDistribution> distrs = { make_heap_aware<NormalDistribution>( 2, 3 ) };
 
 	auto grid = generate_grid( ROW_COUNT, distrs );
 
@@ -135,7 +135,14 @@ int main( )
 
 	double k = 1.0 / sqrt( 2 * _Pi );
 
-	ApproximationMethod method = { [k]( double r ) { return k * exp( -0.5 * r * r ); }, 0.35 };
+	auto gauss_kernel = [k]( double r ) { return k * exp( -0.5 * r * r ); };
+	auto opt_kernel = [=]( double r )
+	{
+		r = ( max - r ) / ( max - min ) * 0.35;
+		return 0.75 * ( 1 - r * r );
+	};
+
+	ApproximationMethod method = { gauss_kernel, 0.35 };
 
 	auto empirical = EmpiricalDistribution( grid, 0, method, min, max, 1e-2 );
 
@@ -143,6 +150,37 @@ int main( )
 	cout << "Sigma = " << empirical.deviation( ) << endl;
 
 	system( "pause" );
+
+	return 0;
+}
+
+#include <CsvReader.h>
+using namespace io;
+
+int main( )
+{
+	int buf_size = 0;
+	
+	cin >> buf_size;
+
+	while ( buf_size != -1 )
+	{
+		CsvReader reader( buf_size, L';' );
+
+		try
+		{
+			auto grid = reader.read( L"grid.csv", false, false );
+			cout << grid->get_row_count( ) << " " << grid->get_column_count( ) << endl;
+		}
+		catch ( unsigned int e )
+		{
+			cout << e << endl;
+		}
+
+		cin >> buf_size;
+	}
+
+	return 0;
 }
 
 int main_archive( )
