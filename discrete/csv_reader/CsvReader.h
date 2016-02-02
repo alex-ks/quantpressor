@@ -9,6 +9,8 @@ namespace io
 		wchar_t delimiter;
 		unsigned int buff_size;
 
+		void parse_and_clear_string( std::wstring &str, std::vector<double> &current_row );
+
 	public:
 		CsvReader( unsigned int buffer_size, wchar_t column_delimiter );
 

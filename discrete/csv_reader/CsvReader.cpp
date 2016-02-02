@@ -4,6 +4,9 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <cmath>
+
+using std::nan;
 
 namespace io
 {
@@ -19,6 +22,19 @@ namespace io
 	CsvReader::CsvReader( unsigned int buffer_size, wchar_t column_delimiter ) : delimiter( column_delimiter ), buff_size( buffer_size )
 	{
 		
+	}
+
+	void CsvReader::parse_and_clear_string( std::wstring &str, std::vector<double> &current_row )
+	{
+		double value;
+
+		if ( str.length( ) != 0 )
+			value = stod( str );
+		else
+			value = nan( "" );
+
+		current_row.push_back( value );
+		str.clear( );
 	}
 
 	pIGrid CsvReader::read( const wstring &path, bool has_column_names, bool has_row_names )
@@ -46,9 +62,7 @@ namespace io
 			{
 				if ( buffer[i] == delimiter )
 				{
-					value = stod( str );
-					current_row.push_back( value );
-					str.clear( );
+					parse_and_clear_string( str, current_row );
 				}
 				else if ( buffer[i] == L'\r' )
 				{
@@ -57,9 +71,7 @@ namespace io
 						goto grid_pack;
 					}
 
-					value = stod( str );
-					current_row.push_back( value );
-					str.clear( );
+					parse_and_clear_string( str, current_row );
 
 					rows.push_back( move( current_row ) );
 					current_row.clear( );
@@ -90,9 +102,7 @@ namespace io
 						}
 
 						//assume there were not '/r'
-						value = stod( str );
-						current_row.push_back( value );
-						str.clear( );
+						parse_and_clear_string( str, current_row );
 
 						rows.push_back( move( current_row ) );
 						current_row = vector<double>( );
