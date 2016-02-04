@@ -41,7 +41,6 @@ namespace distributions
 		{
 			double result = 0.0;
 
-//#pragma omp parallel for reduction( + : result )
 			for ( int i = 0; i < count * step; i += step )
 			{
 				result += method.kernel( ( x - grid->get_value( i, column ) ) * _h );

@@ -42,6 +42,9 @@
     <ClCompile Include="TrapezoidalIntegrator.cpp">
       <Filter>Source Files\Integrators</Filter>
     </ClCompile>
+    <ClCompile Include="FastEmpiricalDistribution.cpp">
+      <Filter>Source Files\Distributions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IDistribution.h">
@@ -61,6 +64,9 @@
     </ClInclude>
     <ClInclude Include="TrapezoidalIntegrator.h">
       <Filter>Header Files\Intergrators</Filter>
+    </ClInclude>
+    <ClInclude Include="FastEmpiricalDistribution.h">
+      <Filter>Header Files\Distributions</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
