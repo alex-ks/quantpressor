@@ -41,7 +41,7 @@ namespace distributions
 		{
 			double result = 0.0;
 
-#pragma omp parallel for reduction( + : result )
+//#pragma omp parallel for reduction( + : result )
 			for ( int i = 0; i < count * step; i += step )
 			{
 				result += method.kernel( ( x - grid->get_value( i, column ) ) * _h );
@@ -60,12 +60,12 @@ namespace distributions
 
 		auto integrator = TrapezoidalIntegrator( step );
 
-		return integrator.integrate( func, min, max );
+		return integrator.integrate( func, left, right );
 	}
 
 	double EmpiricalDistribution::operator()( double x ) const
 	{
-		if ( x < min )
+		if ( x <= min )
 			return 0.0;
 		if ( x > max )
 			return 1.0;
@@ -95,7 +95,7 @@ namespace distributions
 
 		auto func = [&]( double t ) { return t * density( t ); };
 
-		return integrate( func, a, b );
+		return integrate( func, a, b ) / integrate( density, a, b );
 	}
 
 	double EmpiricalDistribution::deviation( ) const
@@ -124,11 +124,12 @@ namespace distributions
 		b = b < max ? b : max;
 
 		auto moment2 = [&]( double t ) { return t * t * density( t ); };
-		auto moment1 = [&]( double t ) { return t * density( t ); };
 
-		double ex = integrate( moment1, a, b );
+		double ex = expectation( a, b );
+		double prob = this->operator()( b ) - this->operator()( a );
+		double m2 = integrate( moment2, a, b );
 
-		return moment2( b ) - moment2( a ) - ex * ex * ( this->operator()( b ) - this->operator()( a ) );
+		return m2 - ex * ex * prob;
 	}
 
 	double EmpiricalDistribution::generate( )

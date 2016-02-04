@@ -16,6 +16,8 @@ namespace integrators
 			result += f( x );
 		}
 
+		step = step < right - left ? step : right - left;
+
 		result += f( right ) * 0.5;
 		result *= step;
 

@@ -36,35 +36,45 @@ grid_compressor::Quantization grid_compressor::Quantizer::quantize( int quant_co
 
 	do
 	{
-		for ( int i = 1; i < quant_count - 1; ++i )
-			q.borders[i] = ( q.codes[i] + q.codes[i - 1] ) / 2;
+		{		
+#pragma omp parallel for
+			for ( int i = 1; i < quant_count - 1; ++i )
+				q.borders[i] = ( q.codes[i] + q.codes[i - 1] ) / 2;
 
-		invariant_count = 0;
+			invariant_count = 0;
 
-		for ( int i = 0; i < quant_count - 1; ++i )
-		{
-			auto c = distribution.expectation( q.borders[i], q.borders[i + 1] );
+#pragma omp parallel for
+			for ( int i = 0; i < quant_count - 1; ++i )
+			{
+				auto c = distribution.expectation( q.borders[i], q.borders[i + 1] );
 
-			if ( std::abs( q.codes[i] - c ) < 1e-7 )
-				invariant_count++;
+				if ( std::abs( q.codes[i] - c ) < 1e-7 )
+					invariant_count++;
 
-			q.codes[i] = c;
+				q.codes[i] = c;
+			}
+
+			eps = 0.0;
+
+#pragma omp parallel for reduction( + : eps )
+			for ( int i = 0; i < quant_count - 1; ++i )
+				eps += distribution.deviation( q.borders[i], q.borders[i + 1] );
 		}
-
-		eps = 0.0;
-
-		for ( int i = 0; i < quant_count - 1; ++i )
-			eps += distribution.deviation( q.borders[i], q.borders[i + 1] );
 	}
 	while ( eps > max_error && invariant_count < quant_count - 1 );
 
 	q.deviation = eps;
 
+	double entropy = 0.0;
+
+#pragma omp parallel for reduction( - : entropy )
 	for ( int i = 1; i < quant_count; ++i )
 	{
 		double p = distribution( q.borders[i] ) - distribution( q.borders[i - 1] );
-		q.entropy -= p * std::log2( p );
+		entropy -= p * std::log2( p );
 	}
+
+	q.entropy = entropy;
 
 	return std::move( q );
 }
