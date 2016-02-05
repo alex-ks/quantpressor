@@ -118,36 +118,42 @@ int main_integrate( )
 #include <EmpiricalDistribution.h>
 #include <cmath>
 
+#include <FastEmpiricalDistribution.h>
+
 int main_distr_replicate( )
 {
 	vector<pIDistribution> distrs = { make_heap_aware<NormalDistribution>( 2, 3 ) };
 
 	auto grid = generate_grid( ROW_COUNT, distrs );
 
-	double min = numeric_limits<double>::max( ),
-		max = numeric_limits<double>::min( );
-
-	for ( int i = 0; i < ROW_COUNT; ++i )
-	{
-		min = min < grid->get_value( i, 0 ) ? min : grid->get_value( i, 0 );
-		max = max > grid->get_value( i, 0 ) ? max : grid->get_value( i, 0 );
-	}
-
 	double k = 1.0 / sqrt( 2 * _Pi );
+	const double _sq2 = 1.0 / sqrt( 2.0 );
 
 	auto gauss_kernel = [k]( double r ) { return k * exp( -0.5 * r * r ); };
-	auto opt_kernel = [=]( double r )
+
+	DetailedApproximationMethod method;
+	method.kernel = gauss_kernel;
+	method.kernel_integral = [_sq2]( double a, double b )
 	{
-		r = ( max - r ) / ( max - min ) * 0.35;
-		return 0.75 * ( 1 - r * r );
+		return 0.5 * ( std::erf( b * _sq2 ) - std::erf( a * _sq2 ) );
+	};
+	method.kernel_moment_1 = [k]( double a, double b )
+	{
+		return -k * ( exp( -0.5 * b * b ) - exp( -0.5 * a * a ) );
 	};
 
-	ApproximationMethod method = { gauss_kernel, 0.35 };
+	auto m2_func = [k, _sq2]( double x ) { return 0.5 * std::erf( x * _sq2 ) - k * x * exp( -0.5 * x * x ); };
 
-	auto empirical = EmpiricalDistribution( grid, 0, method, min, max, 1e-2 );
+	method.kernel_moment_2 = [m2_func]( double a, double b )
+	{
+		return m2_func( b ) - m2_func( a );
+	};
+	method.window = 0.35;
+
+	auto empirical = FastEmpiricalDistribution( grid, 0, method );
 
 	cout << "Alpha = " << empirical.expectation( ) << endl;
-	cout << "Sigma = " << empirical.deviation( ) << endl;
+	cout << "Sigma = " << sqrt( empirical.deviation( ) ) << endl;
 
 	system( "pause" );
 
@@ -324,7 +330,7 @@ int main_archive_normal( )
 	return 0;
 }
 
-int main( )
+int main/*_archive_empirical*/( )
 {
 	auto reader = CsvReader( 1024 * 1024, L';' );
 	auto grid = reader.read( L"grid.csv", false, false );
@@ -338,8 +344,26 @@ int main( )
 	Quantizations qs;
 
 	double k = 1.0 / sqrt( 2 * _Pi );
+	const double _sq2 = 1.0 / sqrt( 2.0 );
 	auto gauss_kernel = [k]( double r ) { return k * exp( -0.5 * r * r ); };
-	ApproximationMethod method = { gauss_kernel, 0.35 };
+	DetailedApproximationMethod method;
+	method.kernel = gauss_kernel;
+	method.kernel_integral = [_sq2]( double a, double b )
+	{
+		return 0.5 * ( std::erf( b * _sq2 ) - std::erf( a * _sq2 ) );
+	};
+	method.kernel_moment_1 = [k]( double a, double b )
+	{
+		return -k * ( exp( -0.5 * b * b ) - exp( -0.5 * a * a ) );
+	};
+
+	auto m2_func = [k, _sq2]( double x ) { return 0.5 * std::erf( x * _sq2 ) - k * x * exp( -0.5 * x * x ); };
+
+	method.kernel_moment_2 = [m2_func]( double a, double b )
+	{
+		return m2_func( b ) - m2_func( a );
+	};
+	method.window = 0.35;
 
 	timer.start( );
 
@@ -358,10 +382,7 @@ int main( )
 		left -= EPS;
 		right += EPS;
 
-		pIDistribution empirical = make_heap_aware<EmpiricalDistribution>( grid, column, method, left, right, 1e-4 );
-
-		/*if ( column == 0 )
-			empirical = make_heap_aware<NormalDistribution>( 0, 1 );*/
+		pIDistribution empirical = make_heap_aware<FastEmpiricalDistribution>( grid, column, method );
 
 		distrs.push_back( empirical );
 

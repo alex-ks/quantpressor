@@ -6,11 +6,9 @@ namespace distributions
 {
 	unsigned int FastEmpiricalDistribution::MAX_SAMPLE_COUNT = 1e3;
 
-	using std::numeric_limits;
-
 	FastEmpiricalDistribution::FastEmpiricalDistribution( const module_api::pIGrid &grid,
 														  module_api::uint column,
-														  const DetailedApproximationMethod &method )
+														  const DetailedApproximationMethod &method ) : INF( std::numeric_limits<double>::max( ) / 1e3 )
 	{
 		auto count = grid->get_row_count( );
 		unsigned int step = 1;
@@ -87,15 +85,13 @@ namespace distributions
 			for ( int i = 0; i < count * step; i += step )
 			{
 				auto value = grid->get_value( i, column );
+				double ta = ( a - value ) * _h, tb = ( b - value ) * _h;
 
-				result += h * h * kernel_moment_2( ( a - value ) * _h,
-												   ( b - value ) * _h );
+				result += h * h * kernel_moment_2( ta, tb );
 
-				result += 2.0 * h * value * kernel_moment_1( ( a - value ) * _h,
-															 ( b - value ) * _h );
+				result += 2.0 * h * value * kernel_moment_1( ta, tb );
 
-				result = value * value * kernel_integral( ( a - value ) * _h,
-														  ( b - value ) * _h );
+				result += value * value * kernel_integral( ta, tb );
 			}
 
 			return result * _m;
@@ -104,13 +100,12 @@ namespace distributions
 
 	double FastEmpiricalDistribution::operator()( double x ) const 
 	{
-		return density_integral( -numeric_limits<double>::infinity( ), x );
+		return density_integral( -INF, x );
 	}
 
 	double FastEmpiricalDistribution::expectation( ) const
 	{
-		auto inf = numeric_limits<double>::infinity( );
-		return moment_1( -inf, inf );
+		return moment_1( -INF, INF );
 	}
 
 	double FastEmpiricalDistribution::expectation( double a, double b ) const
@@ -120,7 +115,8 @@ namespace distributions
 
 	double FastEmpiricalDistribution::deviation( ) const
 	{
-		throw module_api::NotImplementedException( );
+		double ex = expectation( );
+		return moment_2( -INF, INF ) - ex * ex;
 	}
 
 	double FastEmpiricalDistribution::deviation( double a, double b ) const

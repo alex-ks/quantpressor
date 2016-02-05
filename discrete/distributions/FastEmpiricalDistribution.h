@@ -24,6 +24,8 @@ namespace distributions
 	private:
 		RealFunction density;
 		DefinteIntegral density_integral, moment_1, moment_2;
+		
+		const double INF;
 
 	public:
 		static unsigned int MAX_SAMPLE_COUNT;
