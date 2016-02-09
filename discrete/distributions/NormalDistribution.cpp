@@ -13,6 +13,11 @@ distributions::NormalDistribution::NormalDistribution( double mean, double devia
 		throw module_api::BadInputException( L"Deviation must be positive" );
 }
 
+double distributions::NormalDistribution::density( double x ) const
+{
+	return std::exp( -( alpha - x ) * ( alpha - x ) / 2.0 / ( sigma * sigma ) ) / sqrt( 2.0 * std::_Pi );
+}
+
 double distributions::NormalDistribution::operator()( double x ) const
 {
 	auto func = [&]( double t ) { return -0.5 * std::erf( ( alpha - t ) * root_factor ); };

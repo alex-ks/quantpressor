@@ -69,9 +69,9 @@ namespace arithmetic_coding
 
 	}
 
-	vector<double> ModularArithmeticCompressor::compress( const module_api::pIGrid &grid,
-														  const grid_compressor::Quantizations &quantizations,
-														  const grid_compressor::IBinaryOutputStream &s )
+	CompressionResult ModularArithmeticCompressor::compress( const module_api::pIGrid &grid,
+															 const grid_compressor::Quantizations &quantizations,
+															 const grid_compressor::IBinaryOutputStream &s )
 	{
 		throw module_api::NotImplementedException( );
 	}

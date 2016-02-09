@@ -37,7 +37,7 @@ namespace distributions
 		double _h = 1.0 / ( method.window );
 		double _m = 1.0 / count;
 
-		density = [=]( double x )
+		density_func = [=]( double x )
 		{
 			double result = 0.0;
 
@@ -62,6 +62,11 @@ namespace distributions
 		return integrator.integrate( func, left, right );
 	}
 
+	double EmpiricalDistribution::density( double x ) const
+	{
+		return density_func( x );
+	}
+
 	double EmpiricalDistribution::operator()( double x ) const
 	{
 		if ( x <= min )
@@ -69,14 +74,14 @@ namespace distributions
 		if ( x > max )
 			return 1.0;
 
-		return integrate( density, min, x );
+		return integrate( density_func, min, x );
 	}
 
 	double EmpiricalDistribution::expectation( ) const
 	{
 		if ( std::isnan( ex_cache ) )
 		{
-			auto func = [&]( double t ) { return t * density( t ); };
+			auto func = [&]( double t ) { return t * density_func( t ); };
 			double &ex = const_cast<double &>( ex_cache );
 			ex = integrate( func, min, max );
 		}
@@ -92,9 +97,9 @@ namespace distributions
 		a = a > min ? a : min;
 		b = b < max ? b : max;
 
-		auto func = [&]( double t ) { return t * density( t ); };
+		auto func = [&]( double t ) { return t * density_func( t ); };
 
-		return integrate( func, a, b ) / integrate( density, a, b );
+		return integrate( func, a, b ) / integrate( density_func, a, b );
 	}
 
 	double EmpiricalDistribution::deviation( ) const
@@ -103,8 +108,8 @@ namespace distributions
 		{
 			double &dx = const_cast<double &>( dx_cache );
 
-			auto moment2 = [&]( double t ) { return t * t * density( t ); };
-			auto moment1 = [&]( double t ) { return t * density( t ); };
+			auto moment2 = [&]( double t ) { return t * t * density_func( t ); };
+			auto moment1 = [&]( double t ) { return t * density_func( t ); };
 
 			double ex = integrate( moment1, min, max );
 
@@ -122,7 +127,7 @@ namespace distributions
 		a = a > min ? a : min;
 		b = b < max ? b : max;
 
-		auto moment2 = [&]( double t ) { return t * t * density( t ); };
+		auto moment2 = [&]( double t ) { return t * t * density_func( t ); };
 
 		double ex = expectation( a, b );
 		double prob = this->operator()( b ) - this->operator()( a );

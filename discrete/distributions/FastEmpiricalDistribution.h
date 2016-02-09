@@ -22,8 +22,10 @@ namespace distributions
 	class FastEmpiricalDistribution : public IDistribution
 	{
 	private:
-		RealFunction density;
+		RealFunction density_func;
 		DefinteIntegral density_integral, moment_1, moment_2;
+		
+		std::vector<double> density_sample;
 		
 		const double INF;
 
@@ -34,6 +36,10 @@ namespace distributions
 								   module_api::uint column,
 								   const DetailedApproximationMethod &method );
 
+		FastEmpiricalDistribution( std::vector<double> &&sample,
+								   const DetailedApproximationMethod &method );
+
+		double density( double x ) const override;
 		double operator()( double x ) const override;
 		double expectation( ) const override;
 		double expectation( double a, double b ) const override;

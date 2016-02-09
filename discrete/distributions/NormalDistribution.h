@@ -17,6 +17,7 @@ namespace distributions
 	public:
 		NormalDistribution( double mean, double deviation );
 
+		double density( double x ) const override;
 		double operator()( double x ) const override;
 
 		double expectation( ) const override;

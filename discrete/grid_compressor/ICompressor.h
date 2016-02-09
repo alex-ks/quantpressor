@@ -10,6 +10,13 @@ namespace grid_compressor
 {
 	typedef std::vector<Quantization> Quantizations;
 
+	struct CompressionResult
+	{
+		std::vector<double> columns_bps;
+		std::vector<double> real_variances;
+		std::vector<double> min_errors, avg_errors, max_errors;
+	};
+
 	class ICompressor
 	{
 	public:
@@ -18,7 +25,7 @@ namespace grid_compressor
 		///<para>Compresses specified grid to stream</para>
 		///<para>Returns vector of avetage bit counts per symbol for each column</para>
 		///</summary>
-		virtual std::vector<double> compress( const module_api::pIGrid &grid,
+		virtual CompressionResult compress( const module_api::pIGrid &grid,
 											  const Quantizations &quantizations,
 											  const IBinaryOutputStream &stream ) = 0;
 

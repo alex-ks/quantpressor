@@ -225,14 +225,14 @@ int main_archive_normal( )
 
 	huffman::HuffmanCompressor compressor;
 
-	vector<double> bps_counts;
+	CompressionResult compress_params;
 
 	double compression_time, decompression_time;
 
 	{
 		FileOutputStream stream( L"output.txt" );
 		timer.start( );
-		bps_counts = compressor.compress( grid, qs, stream );
+		compress_params = compressor.compress( grid, qs, stream );
 		compression_time = timer.stop( );
 	}
 
@@ -312,7 +312,7 @@ int main_archive_normal( )
 
 			cout << "Interval: " << "[" << left_borders[i] << "; " << right_borders[i] << "]" << endl;
 			cout << "Expected entropy = " << qs[i].entropy << endl;
-			cout << "Average bit count per symbol = " << bps_counts[i] << endl;
+			cout << "Average bit count per symbol = " << compress_params.columns_bps[i] << endl;
 			cout << "Expected mean square deviation = " << qs[i].deviation << endl;
 			cout << "Real mean square deviation = " << ms_error[i] << endl;
 			cout << "Minimal deviation = " << min_error[i] << endl;
@@ -397,14 +397,14 @@ int main/*_archive_empirical*/( )
 
 	huffman::HuffmanCompressor compressor;
 
-	vector<double> bps_counts;
+	CompressionResult compression_params;
 
 	double compression_time, decompression_time;
 
 	{
 		FileOutputStream stream( L"output.txt" );
 		timer.start( );
-		bps_counts = compressor.compress( grid, qs, stream );
+		compression_params = compressor.compress( grid, qs, stream );
 		compression_time = timer.stop( );
 	}
 
@@ -425,15 +425,8 @@ int main/*_archive_empirical*/( )
 
 #pragma region ERROR_COUNT
 
-		vector<double> max_error( grid->get_column_count( ) ),
-			min_error( grid->get_column_count( ) ),
-			avg_error( grid->get_column_count( ) ),
-			ms_error( grid->get_column_count( ) ),
-			left_borders( grid->get_column_count( ) ),
+		vector<double> left_borders( grid->get_column_count( ) ),
 			right_borders( grid->get_column_count( ) );
-
-		for ( auto &val : min_error )
-			val = numeric_limits<double>::max( );
 
 		for ( auto &val : left_borders )
 			val = numeric_limits<double>::max( );
@@ -447,33 +440,6 @@ int main/*_archive_empirical*/( )
 			{
 				left_borders[j] = grid->get_value( i, j ) > left_borders[j] ? left_borders[j] : grid->get_value( i, j );
 				right_borders[j] = grid->get_value( i, j ) < right_borders[j] ? right_borders[j] : grid->get_value( i, j );
-
-				auto error = fabs( grid->get_value( i, j ) -
-								   decompressed->get_value( i, j ) );
-
-				auto square_error = pow( ( grid->get_value( i, j ) -
-										   decompressed->get_value( i, j ) ), 2 );
-
-				max_error[j] = max_error[j] > error ? max_error[j] : error;
-				min_error[j] = min_error[j] < error ? min_error[j] : error;
-
-				if ( i > 0 )
-				{
-					avg_error[j] = ( avg_error[j] * i + error ) / ( i + 1 );
-				}
-				else
-				{
-					avg_error[j] = error;
-				}
-
-				if ( i > 0 )
-				{
-					ms_error[j] = ( ms_error[j] * i + square_error ) / ( i + 1 );
-				}
-				else
-				{
-					ms_error[j] = square_error;
-				}
 			}
 		}
 
@@ -483,12 +449,12 @@ int main/*_archive_empirical*/( )
 
 			cout << "Interval: " << "[" << left_borders[i] << "; " << right_borders[i] << "]" << endl;
 			cout << "Expected entropy = " << qs[i].entropy << endl;
-			cout << "Average bit count per symbol = " << bps_counts[i] << endl;
+			cout << "Average bit count per symbol = " << compression_params.columns_bps[i] << endl;
 			cout << "Expected mean square deviation = " << qs[i].deviation << endl;
-			cout << "Real mean square deviation = " << ms_error[i] << endl;
-			cout << "Minimal deviation = " << min_error[i] << endl;
-			cout << "Maximal deviation = " << max_error[i] << endl;
-			cout << "Average deviation = " << avg_error[i] << endl;
+			cout << "Real mean square deviation = " << compression_params.real_variances[i] << endl;
+			cout << "Minimal deviation = " << compression_params.min_errors[i] << endl;
+			cout << "Maximal deviation = " << compression_params.max_errors[i] << endl;
+			cout << "Average deviation = " << compression_params.avg_errors[i] << endl;
 			cout << endl << endl;
 		}
 

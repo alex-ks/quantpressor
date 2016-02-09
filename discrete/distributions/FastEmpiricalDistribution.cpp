@@ -8,7 +8,7 @@ namespace distributions
 
 	FastEmpiricalDistribution::FastEmpiricalDistribution( const module_api::pIGrid &grid,
 														  module_api::uint column,
-														  const DetailedApproximationMethod &method ) : INF( std::numeric_limits<double>::max( ) / 1e3 )
+														  const DetailedApproximationMethod &method ) : INF( std::numeric_limits<double>::max( ) / 1e3 ), density_sample( 0 )
 	{
 		auto count = grid->get_row_count( );
 		unsigned int step = 1;
@@ -25,7 +25,7 @@ namespace distributions
 
 		auto &kernel = method.kernel;
 
-		density = [_h, _m, grid, step, count, column, kernel]( double x )
+		density_func = [_h, _m, grid, step, count, column, kernel]( double x )
 		{
 			double result = 0.0;
 
@@ -78,7 +78,7 @@ namespace distributions
 
 		auto &kernel_moment_2 = method.kernel_moment_2;
 
-		moment_2 = [=]( double a, double b )
+		moment_2 = [count, step, grid, column, h, _h, _m, kernel_integral, kernel_moment_1, kernel_moment_2]( double a, double b )
 		{
 			double result = 0.0;
 
@@ -98,7 +98,97 @@ namespace distributions
 		};
 	}
 
-	double FastEmpiricalDistribution::operator()( double x ) const 
+	FastEmpiricalDistribution::FastEmpiricalDistribution( std::vector<double> &&sample,
+														  const DetailedApproximationMethod & method ) : INF( std::numeric_limits<double>::max( ) / 1e3 ), density_sample( std::move( sample ) )
+	{
+		auto count = density_sample.size( );
+		auto data = density_sample.data( );
+
+		double h = method.window;
+		double _h = 1.0 / ( method.window );
+		double _m = 1.0 / count;
+
+		auto &kernel = method.kernel;
+
+		density_func = [_h, _m, data, count, kernel]( double x )
+		{
+			double result = 0.0;
+
+			for ( int i = 0; i < count; ++i )
+			{
+				result += kernel( ( x - data[i] ) * _h );
+			}
+
+			result *= _h * _m;
+
+			return result;
+		};
+
+		auto &kernel_integral = method.kernel_integral;
+
+		density_integral = [_h, _m, data, count, kernel_integral]( double a, double b )
+		{
+			double result = 0.0;
+
+			for ( int i = 0; i < count; ++i )
+			{
+				auto value = data[i];
+
+				result += kernel_integral( ( a - value ) * _h,
+										   ( b - value ) * _h );
+			}
+
+			return result * _m;
+		};
+
+		auto &kernel_moment_1 = method.kernel_moment_1;
+
+		moment_1 = [count, data, h, _h, _m, kernel_integral, kernel_moment_1]( double a, double b )
+		{
+			double result = 0.0;
+
+			for ( int i = 0; i < count; ++i )
+			{
+				auto value = data[i];
+
+				result += h * kernel_moment_1( ( a - value ) * _h,
+											   ( b - value ) * _h );
+
+				result += value * kernel_integral( ( a - value ) * _h,
+												   ( b - value ) * _h );
+			}
+
+			return result * _m;
+		};
+
+		auto &kernel_moment_2 = method.kernel_moment_2;
+
+		moment_2 = [count, data, h, _h, _m, kernel_integral, kernel_moment_1, kernel_moment_2]( double a, double b )
+		{
+			double result = 0.0;
+
+			for ( int i = 0; i < count; ++i )
+			{
+				auto value = data[i];
+				double ta = ( a - value ) * _h, tb = ( b - value ) * _h;
+
+				result += h * h * kernel_moment_2( ta, tb );
+
+				result += 2.0 * h * value * kernel_moment_1( ta, tb );
+
+				result += value * value * kernel_integral( ta, tb );
+			}
+
+			return result * _m;
+		};
+	}
+
+	double FastEmpiricalDistribution::density( double x ) const
+	{
+		return density_func( x );
+	}
+
+	double FastEmpiricalDistribution::operator()( double x ) const
 	{
 		return density_integral( -INF, x );
 	}

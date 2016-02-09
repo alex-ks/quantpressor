@@ -17,7 +17,7 @@ namespace distributions
 	class EmpiricalDistribution : public IDistribution
 	{
 	private:
-		integrators::RealFunction density;
+		integrators::RealFunction density_func;
 		double min, max, error, ex_cache, dx_cache;
 
 		double integrate( const integrators::RealFunction &func, double left, double right ) const;
@@ -32,6 +32,7 @@ namespace distributions
 							   double max_value,
 							   double error_order );
 
+		double density( double x ) const override;
 		double operator()( double x ) const override;
 
 		double expectation( ) const override;

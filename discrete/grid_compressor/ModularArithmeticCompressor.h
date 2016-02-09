@@ -23,9 +23,9 @@ namespace arithmetic_coding
 		ModularArithmeticCompressor( BlockIndexType block_size );
 		~ModularArithmeticCompressor( ) override;
 
-		std::vector<double> compress( const module_api::pIGrid &grid,
-									  const grid_compressor::Quantizations &quantizations,
-									  const grid_compressor::IBinaryOutputStream &stream ) override;
+		grid_compressor::CompressionResult compress( const module_api::pIGrid &grid,
+													 const grid_compressor::Quantizations &quantizations,
+													 const grid_compressor::IBinaryOutputStream &stream ) override;
 
 		module_api::pIGrid decompress( const grid_compressor::IBinaryInputStream &stream ) override;
 	};

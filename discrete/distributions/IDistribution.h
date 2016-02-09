@@ -5,6 +5,8 @@ namespace distributions
 	class IDistribution
 	{
 	public:
+		virtual double density( double x ) const = 0;
+
 		virtual double operator()( double x ) const = 0;
 
 		virtual double expectation( ) const = 0;

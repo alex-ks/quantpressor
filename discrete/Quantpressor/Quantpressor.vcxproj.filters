@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Distributions">
+      <UniqueIdentifier>{174c2acc-6b7b-448f-b81e-cc867a86dbb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Compressors">
+      <UniqueIdentifier>{ce2cea6b-2188-457f-ad5f-f9179d608ac0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FileIO">
+      <UniqueIdentifier>{58e90618-a622-4365-a235-0ffd096828cb}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Quantpressor.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="EmpiricalDistribution.h">
+      <Filter>Distributions</Filter>
+    </ClInclude>
+    <ClInclude Include="HuffmanCompressor.h">
+      <Filter>Compressors</Filter>
+    </ClInclude>
+    <ClInclude Include="NativeGrid.h" />
+    <ClInclude Include="NativeQuantization.h" />
+    <ClInclude Include="FileOutputStream.h">
+      <Filter>FileIO</Filter>
+    </ClInclude>
+    <ClInclude Include="FileInputStream.h">
+      <Filter>FileIO</Filter>
+    </ClInclude>
+    <ClInclude Include="CsvGridReader.h">
+      <Filter>FileIO</Filter>
+    </ClInclude>
+    <ClInclude Include="Quantizer.h" />
+    <ClInclude Include="INativeDistribution.h">
+      <Filter>Distributions</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AssemblyInfo.cpp" />
+    <ClCompile Include="EmpiricalDistribution.cpp">
+      <Filter>Distributions</Filter>
+    </ClCompile>
+    <ClCompile Include="HuffmanCompressor.cpp">
+      <Filter>Compressors</Filter>
+    </ClCompile>
+    <ClCompile Include="NativeGrid.cpp" />
+    <ClCompile Include="NativeQuantization.cpp" />
+    <ClCompile Include="FileOutputStream.cpp">
+      <Filter>FileIO</Filter>
+    </ClCompile>
+    <ClCompile Include="FileInputStream.cpp">
+      <Filter>FileIO</Filter>
+    </ClCompile>
+    <ClCompile Include="CsvGridReader.cpp">
+      <Filter>FileIO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\csv_reader\CsvReader.cpp" />
+    <ClCompile Include="Quantizer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="app.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="app.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+</Project>

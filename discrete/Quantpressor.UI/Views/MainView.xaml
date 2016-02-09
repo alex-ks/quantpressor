@@ -1,0 +1,54 @@
+﻿<Window x:Class="Quantpressor.UI.Views.MainView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Quantpressor.UI.Views"
+        xmlns:cal="http://www.caliburnproject.org"
+        mc:Ignorable="d"
+        Title="MainView" Height="170" Width="300" ResizeMode="NoResize">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        
+        <TextBlock Text="Max error:"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Grid.Row="0"
+                   Grid.Column="0"/>
+
+        <TextBlock Text="Quant count:"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Grid.Row="1"
+                   Grid.Column="0"/>
+
+        <TextBox Text="{Binding Error, UpdateSourceTrigger=PropertyChanged}" 
+                 PreviewTextInput="ErrorBox_OnPreviewTextInput"
+                 Margin="5"
+                 Grid.Row="0"
+                 Grid.Column="1"/>
+        <TextBox Text="{Binding QuantCount, UpdateSourceTrigger=PropertyChanged}"
+                 PreviewTextInput="QuantCountBox_OnPreviewTextInput"
+                 Margin="5"
+                 Grid.Row="1"
+                 Grid.Column="1"/>
+        
+        <Button Content="Compress"
+                Margin="10"
+                cal:Message.Attach="Compress"
+                Grid.Row="2"
+                Grid.Column="0"/>
+        <Button Content="Decompress"
+                Margin="10"
+                Grid.Row="2"
+                Grid.Column="1"/>
+    </Grid>
+</Window>
