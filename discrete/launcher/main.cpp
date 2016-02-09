@@ -76,7 +76,7 @@ void write_grid( string file_name, const pIGrid &grid )
 
 #define QUANT_COUNT 100
 #define ROW_COUNT 1e6
-#define EPS 1e-1
+#define EPS 1e-2
 
 int main_io( )
 {
