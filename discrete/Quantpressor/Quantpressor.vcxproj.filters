@@ -59,7 +59,6 @@
     <ClCompile Include="CsvGridReader.cpp">
       <Filter>FileIO</Filter>
     </ClCompile>
-    <ClCompile Include="..\csv_reader\CsvReader.cpp" />
     <ClCompile Include="Quantizer.cpp" />
   </ItemGroup>
   <ItemGroup>

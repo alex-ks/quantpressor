@@ -5,49 +5,52 @@
 
 #include "IBinaryInputStream.h"
 
-namespace grid_compressor
+namespace quantpressor
 {
-	class FileInputStream : public IBinaryInputStream
+	namespace io
 	{
-		static const unsigned int BUFFER_SIZE = 1024;
-		static const unsigned int BITS_COUNT = 8;
-
-		std::FILE *file;
-		byte buffered_bits;
-		int buffered_bits_count;
-		byte *buffered_bytes;
-		unsigned int buffered_count, next_unread;
-		bool eof = false;
-
-		template<typename T> inline IBinaryInputStream &read_smth( T &smth )
+		class FileInputStream : public IBinaryInputStream
 		{
-			auto bytes = reinterpret_cast<byte*>( &smth );
-			read_bytes( bytes, sizeof( T ) );
-			return *this;
-		}
+			static const unsigned int BUFFER_SIZE = 1024;
+			static const unsigned int BITS_COUNT = 8;
 
-		FileInputStream( const FileInputStream & ) = delete;
+			std::FILE *file;
+			byte buffered_bits;
+			int buffered_bits_count;
+			byte *buffered_bytes;
+			unsigned int buffered_count, next_unread;
+			bool eof = false;
 
-		void load_bytes( );
-		inline byte read_bit_as_byte( );
+			template<typename T> inline IBinaryInputStream &read_smth( T &smth )
+			{
+				auto bytes = reinterpret_cast<byte*>( &smth );
+				read_bytes( bytes, sizeof( T ) );
+				return *this;
+			}
 
-	public:
-		FileInputStream( std::wstring file_name );
+			FileInputStream( const FileInputStream & ) = delete;
 
-		FileInputStream( FileInputStream &&stream );
-		FileInputStream &operator=( FileInputStream &&stream );
+			void load_bytes( );
+			inline byte read_bit_as_byte( );
 
-		~FileInputStream( );
+		public:
+			FileInputStream( std::wstring file_name );
 
-		virtual IBinaryInputStream & operator>>( int & ) override;
-		virtual IBinaryInputStream & operator>>( unsigned int & ) override;
-		virtual IBinaryInputStream & operator>>( unsigned long long & ) override;
-		virtual IBinaryInputStream & operator>>( byte & ) override;
-		virtual IBinaryInputStream & operator>>( double & ) override;
+			FileInputStream( FileInputStream &&stream );
+			FileInputStream &operator=( FileInputStream &&stream );
 
-		virtual bool read_bit( ) override;
-		virtual unsigned int read_bytes( byte * bytes, unsigned int count ) override;
+			~FileInputStream( );
 
-		virtual bool end_of_stream( ) override;
-	};
+			virtual IBinaryInputStream & operator>>( int & ) override;
+			virtual IBinaryInputStream & operator>>( unsigned int & ) override;
+			virtual IBinaryInputStream & operator>>( unsigned long long & ) override;
+			virtual IBinaryInputStream & operator>>( byte & ) override;
+			virtual IBinaryInputStream & operator>>( double & ) override;
+
+			virtual bool read_bit( ) override;
+			virtual unsigned int read_bytes( byte * bytes, unsigned int count ) override;
+
+			virtual bool end_of_stream( ) override;
+		};
+	}
 }

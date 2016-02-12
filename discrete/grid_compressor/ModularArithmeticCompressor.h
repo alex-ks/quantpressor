@@ -2,31 +2,34 @@
 
 #include "ICompressor.h"
 
-namespace arithmetic_coding
+namespace quantpressor
 {
-	typedef unsigned int BlockIndexType;
-
-	class ModularArithmeticCompressor : public grid_compressor::ICompressor
+	namespace arithmetic_coding
 	{
-	private:
-		static const BlockIndexType DEFAULT_BLOCK_SIZE = 16;
+		typedef unsigned int BlockIndexType;
 
-		BlockIndexType block_size;
+		class ModularArithmeticCompressor : public quantpressor::ICompressor
+		{
+		private:
+			static const BlockIndexType DEFAULT_BLOCK_SIZE = 16;
 
-		double compress_column( module_api::uint column,
-								const module_api::pIGrid &grid,
-								const grid_compressor::Quantization &quantization,
-								const grid_compressor::IBinaryOutputStream &stream );
+			BlockIndexType block_size;
 
-	public:
-		ModularArithmeticCompressor( );
-		ModularArithmeticCompressor( BlockIndexType block_size );
-		~ModularArithmeticCompressor( ) override;
+			double compress_column( module_api::uint column,
+									const module_api::pIGrid &grid,
+									const quantpressor::Quantization &quantization,
+									const quantpressor::IBinaryOutputStream &stream );
 
-		grid_compressor::CompressionResult compress( const module_api::pIGrid &grid,
-													 const grid_compressor::Quantizations &quantizations,
-													 const grid_compressor::IBinaryOutputStream &stream ) override;
+		public:
+			ModularArithmeticCompressor( );
+			ModularArithmeticCompressor( BlockIndexType block_size );
+			~ModularArithmeticCompressor( ) override;
 
-		module_api::pIGrid decompress( const grid_compressor::IBinaryInputStream &stream ) override;
-	};
+			quantpressor::CompressionResult compress( const module_api::pIGrid &grid,
+													  const quantpressor::Quantizations &quantizations,
+													  const quantpressor::IBinaryOutputStream &stream ) override;
+
+			module_api::pIGrid decompress( const quantpressor::IBinaryInputStream &stream ) override;
+		};
+	}
 }

@@ -2,7 +2,7 @@
 
 #include "IBinaryStream.h"
 
-namespace grid_compressor
+namespace quantpressor
 {
 	class IBinaryInputStream
 	{

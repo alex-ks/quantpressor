@@ -3,7 +3,7 @@
 #include <lib.h>
 #include <vector>
 
-namespace grid_compressor
+namespace quantpressor
 {
 	struct Quantization
 	{

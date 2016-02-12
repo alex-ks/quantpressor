@@ -13,17 +13,17 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\arithmetic_coding">
-      <UniqueIdentifier>{77ecb7cb-5b1f-4384-b607-e988701fe7f3}</UniqueIdentifier>
+    <Filter Include="Source Files\compressors">
+      <UniqueIdentifier>{ed27df9a-a852-4e62-a055-e377049b3f2a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\huffman">
-      <UniqueIdentifier>{894f5b48-fbca-46f8-b55a-b5e6e8911033}</UniqueIdentifier>
+    <Filter Include="Header Files\compressors">
+      <UniqueIdentifier>{ade8bcb3-a7f1-4752-b38a-d8a0560df1a1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\huffman">
-      <UniqueIdentifier>{5247e343-a8be-41c7-a316-d33678c9bb9d}</UniqueIdentifier>
+    <Filter Include="Header Files\io">
+      <UniqueIdentifier>{e4b59ca7-6305-41af-8201-5bc8c36b6de4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\arithmetic_coding">
-      <UniqueIdentifier>{100107b7-be3c-4ea7-820b-ccbd0f392fc1}</UniqueIdentifier>
+    <Filter Include="Source Files\io">
+      <UniqueIdentifier>{527751da-7aca-4ff8-8a5b-26422be44933}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -33,26 +33,11 @@
     <ClInclude Include="ICompressor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TreeNode.h">
-      <Filter>Header Files\huffman</Filter>
-    </ClInclude>
-    <ClInclude Include="HuffmanCompressor.h">
-      <Filter>Header Files\huffman</Filter>
-    </ClInclude>
     <ClInclude Include="IBinaryOutputStream.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FileOutputStream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="IBinaryInputStream.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FileInputStream.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ModularArithmeticCompressor.h">
-      <Filter>Header Files\arithmetic_coding</Filter>
     </ClInclude>
     <ClInclude Include="utilities.h">
       <Filter>Header Files</Filter>
@@ -60,28 +45,49 @@
     <ClInclude Include="IBinaryStream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TreeNode.h">
+      <Filter>Header Files\compressors</Filter>
+    </ClInclude>
+    <ClInclude Include="HuffmanCompressor.h">
+      <Filter>Header Files\compressors</Filter>
+    </ClInclude>
+    <ClInclude Include="ModularArithmeticCompressor.h">
+      <Filter>Header Files\compressors</Filter>
+    </ClInclude>
+    <ClInclude Include="LZ77HuffmanCompressor.h">
+      <Filter>Header Files\compressors</Filter>
+    </ClInclude>
+    <ClInclude Include="FileInputStream.h">
+      <Filter>Header Files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="FileOutputStream.h">
+      <Filter>Header Files\io</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Quantizer.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FileOutputStream.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FileInputStream.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="HuffmanCompressor.cpp">
-      <Filter>Source Files\huffman</Filter>
-    </ClCompile>
-    <ClCompile Include="ModularArithmeticCompressor.cpp">
-      <Filter>Source Files\arithmetic_coding</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Include\RoughGrid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Include\RoughMetadata.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HuffmanCompressor.cpp">
+      <Filter>Source Files\compressors</Filter>
+    </ClCompile>
+    <ClCompile Include="ModularArithmeticCompressor.cpp">
+      <Filter>Source Files\compressors</Filter>
+    </ClCompile>
+    <ClCompile Include="FileInputStream.cpp">
+      <Filter>Source Files\io</Filter>
+    </ClCompile>
+    <ClCompile Include="FileOutputStream.cpp">
+      <Filter>Source Files\io</Filter>
+    </ClCompile>
+    <ClCompile Include="LZ77HuffmanCompressor.cpp">
+      <Filter>Source Files\compressors</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

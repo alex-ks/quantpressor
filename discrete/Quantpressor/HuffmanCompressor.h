@@ -13,6 +13,8 @@ namespace Quantpressor
 			huffman::HuffmanCompressor *nativeCompressor;
 
 		public:
+			HuffmanCompressor( );
+			!HuffmanCompressor( );
 
 			virtual ICompressionResult ^Compress( IGrid ^grid,
 												  System::Collections::Generic::IList<IQuantization ^> ^quantizations,

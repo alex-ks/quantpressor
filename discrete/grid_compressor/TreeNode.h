@@ -1,74 +1,76 @@
 #pragma once
 
-namespace huffman
+namespace quantpressor
 {
-	typedef unsigned long long ull;
-
-	template <typename T> struct less;
-
-	template <typename T> class TreeNode
+	namespace compressors
 	{
-	private:
-		T value;
-		ull priority;
-		bool is_leaf;
-		TreeNode *one, *zero;
+		typedef unsigned long long ull;
 
-	public:
-		TreeNode( TreeNode *one, TreeNode *zero ) : 
-			one( one ), 
-			zero( zero ),
-			value( )
+		template <typename T> class TreeNode
 		{
-			is_leaf = false;
-			priority = 0UL;
+		private:
+			T value;
+			ull priority;
+			bool is_leaf;
+			TreeNode *one, *zero;
 
-			if ( one != nullptr )
-				priority += one->priority;
-			if ( zero != nullptr )
-				priority += zero->priority;
-		}
+		public:
+			TreeNode( TreeNode *one, TreeNode *zero ) :
+				one( one ),
+				zero( zero ),
+				value( )
+			{
+				is_leaf = false;
+				priority = 0UL;
 
-		TreeNode( const T& value, ull count ) : value( value ), one( nullptr ), zero( nullptr )
-		{
-			is_leaf = true;
-			priority = count;
-		}
+				if ( one != nullptr )
+					priority += one->priority;
+				if ( zero != nullptr )
+					priority += zero->priority;
+			}
 
-		~TreeNode( )
-		{
-			delete one;
-			delete zero;
-		}
+			TreeNode( const T& value, ull count ) : value( value ), one( nullptr ), zero( nullptr )
+			{
+				is_leaf = true;
+				priority = count;
+			}
 
-		bool stores_value( ) const
-		{
-			return is_leaf;
-		}
+			~TreeNode( )
+			{
+				delete one;
+				delete zero;
+			}
 
-		T get_value( ) const
-		{
-			return value;
-		}
+			bool stores_value( ) const
+			{
+				return is_leaf;
+			}
 
-		TreeNode *get_one( ) const
-		{
-			return one;
-		}
+			T get_value( ) const
+			{
+				return value;
+			}
 
-		TreeNode *get_zero( ) const
-		{
-			return zero;
-		}
+			TreeNode *get_one( ) const
+			{
+				return one;
+			}
 
-		friend struct less<T>;
-	};
+			TreeNode *get_zero( ) const
+			{
+				return zero;
+			}
 
-	template <typename T> struct less
-	{
-		bool operator() ( TreeNode<T> *a, TreeNode<T> *b )
-		{
-			return a->priority > b->priority;
-		}
-	};
+			friend struct less;
+
+			struct less
+			{
+				bool operator() ( TreeNode<T> *a, TreeNode<T> *b )
+				{
+					return a->priority > b->priority;
+				}
+			};
+		};
+	}
 }
+

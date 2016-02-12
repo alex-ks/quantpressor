@@ -1,11 +1,11 @@
 #pragma once
 #include "Quantizer.h"
 
-namespace grid_compressor
+namespace quantpressor
 {
 	typedef unsigned long long ull;
 
-	inline double find_code( double value, const Quantization &quantization )
+	inline unsigned int find_code_index( double value, const Quantization &quantization )
 	{
 		module_api::uint left = 0, right = quantization.codes.size( );
 		module_api::uint i = ( right - left ) / 2;
@@ -23,6 +23,12 @@ namespace grid_compressor
 			i = left + ( right - left ) / 2;
 		}
 
+		return i;
+	}
+
+	inline double find_code( double value, const Quantization &quantization )
+	{
+		auto i = find_code_index( value, quantization );
 		return quantization.codes[i];
 	}
 }

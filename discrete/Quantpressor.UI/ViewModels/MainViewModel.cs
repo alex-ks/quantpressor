@@ -84,18 +84,13 @@ namespace Quantpressor.UI.ViewModels
 				quantizations.Add( quantizer.Quantize( _quantCount, _error, distr ) );
 			}
 
-			MessageBox.Show( "atata" );
-
 			progressBar.Status = "Writing archive...";
 			progressBar.Progress = ( double )grid.ColumnCount / ( grid.ColumnCount + 1 );
-
-			MessageBox.Show( "atata" );
 
 			ICompressionResult result;
 
 			using ( var stream = new FileOutputStream( outName ) )
 			{
-				MessageBox.Show( "atata" );
 				var compressor = new HuffmanCompressor( );
 				result = compressor.Compress( grid, quantizations, stream );
 			}
@@ -131,8 +126,9 @@ namespace Quantpressor.UI.ViewModels
 			var progressBar = new ProgressViewModel( );
 
 			dynamic settings = new ExpandoObject( );
-			settings.Width = 500;
 			settings.Height = 100;
+			settings.Width = 500;
+			settings.SizeToContent = SizeToContent.Manual;
 
 			_manager.ShowWindow( progressBar, null, settings );
 

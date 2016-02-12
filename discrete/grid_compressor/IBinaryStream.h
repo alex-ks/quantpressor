@@ -1,6 +1,6 @@
 #pragma once
 
-namespace grid_compressor
+namespace quantpressor
 {
 	typedef unsigned char byte;
 	typedef unsigned long long ull;

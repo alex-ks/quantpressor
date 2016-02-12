@@ -61,6 +61,46 @@ namespace Quantpressor
 			}
 		};
 
+		HuffmanCompressor::HuffmanCompressor( )
+		{
+			nativeCompressor = new huffman::HuffmanCompressor( );
+		}
+
+		HuffmanCompressor::!HuffmanCompressor( )
+		{
+			if ( nativeCompressor != nullptr )
+			{
+				delete nativeCompressor;
+				nativeCompressor = nullptr;
+			}
+		}
+
+#pragma unmanaged
+
+#include <stdio.h>
+
+		grid_compressor::CompressionResult CompressGrid( grid_compressor::ICompressor &compressor,
+														 const module_api::pIGrid &grid,
+														 grid_compressor::Quantizations &qs,
+														 grid_compressor::IBinaryOutputStream &stream )
+		{
+			freopen( "out.txt", "w", stdout );
+			for ( auto &q : qs )
+			{
+				for ( auto &b : q.borders )
+					printf( "%lf ", b );
+				printf( "\n" );
+
+				for ( auto &b : q.codes )
+					printf( "%lf ", b );
+				printf( "\n" );
+			}
+			fflush( stdout );
+			return compressor.compress( grid, qs, stream );
+		}
+
+#pragma managed
+
 		ICompressionResult ^HuffmanCompressor::Compress( IGrid ^ grid,
 														 System::Collections::Generic::IList<IQuantization^>^ quantizations,
 														 IBinaryOutputStream ^ stream )
@@ -75,7 +115,7 @@ namespace Quantpressor
 			if ( streamWrapper == nullptr )
 				throw gcnew System::ArgumentException( L"Cannot work with managed binary streams" );
 
-			auto nativeStream = streamWrapper->NativePtr( );
+			auto &nativeStream = *streamWrapper->NativePtr( );
 
 			grid_compressor::Quantizations qs;
 
@@ -106,7 +146,7 @@ namespace Quantpressor
 				}
 			}
 
-			auto params = nativeCompressor->compress( nativeGrid, qs, *nativeStream );
+			auto params = CompressGrid( *nativeCompressor, nativeGrid, qs, nativeStream );
 
 			return gcnew NativeCompressionResultCopy( params );
 		}

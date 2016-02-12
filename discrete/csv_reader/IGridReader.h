@@ -3,13 +3,13 @@
 #include <io.h>
 #include <string>
 
-namespace io
+namespace quantpressor
 {
-	class IInputReader
+	class IGridReader
 	{
 	public:
 		virtual module_api::pIGrid read( const std::wstring &path, bool has_column_names, bool has_row_names ) = 0;
 
-		virtual ~IInputReader( ) { }
+		virtual ~IGridReader( ) { }
 	};
 }

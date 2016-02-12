@@ -17,7 +17,8 @@ using namespace std;
 using namespace module_api;
 using namespace distributions;
 using namespace grid_generator;
-using namespace grid_compressor;
+using namespace quantpressor;
+using namespace quantpressor::io;
 
 int distrib_test( )
 {
@@ -161,7 +162,6 @@ int main_distr_replicate( )
 }
 
 #include <CsvReader.h>
-using namespace io;
 
 int main_read( )
 {
@@ -223,7 +223,7 @@ int main_archive_normal( )
 	quatize_time = timer.stop( );
 	cout << "Quantization time: " << quatize_time << "s" << endl;
 
-	huffman::HuffmanCompressor compressor;
+	compressors::HuffmanCompressor compressor;
 
 	CompressionResult compress_params;
 
@@ -333,7 +333,7 @@ int main_archive_normal( )
 int main/*_archive_empirical*/( )
 {
 	auto reader = CsvReader( 1024 * 1024, L';' );
-	auto grid = reader.read( L"grid.csv", false, false );
+	auto grid = reader.read( L"real_data.csv", false, false );
 
 	cout << "Grid loaded" << endl;
 
@@ -395,7 +395,7 @@ int main/*_archive_empirical*/( )
 	quatize_time = timer.stop( );
 	cout << "Quantization time: " << quatize_time << "s" << endl;
 
-	huffman::HuffmanCompressor compressor;
+	compressors::HuffmanCompressor compressor;
 
 	CompressionResult compression_params;
 

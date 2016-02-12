@@ -116,7 +116,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CsvReader.h" />
-    <ClInclude Include="IInputReader.h" />
+    <ClInclude Include="IGridReader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Include\RoughGrid.cpp" />

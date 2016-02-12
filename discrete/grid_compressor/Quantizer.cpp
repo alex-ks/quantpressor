@@ -3,7 +3,7 @@
 #include <utility>
 #include <cmath>
 
-grid_compressor::Quantization::Quantization( int quant_count ) :
+quantpressor::Quantization::Quantization( int quant_count ) :
 	borders( quant_count ),
 	codes( quant_count - 1 ),
 	deviation( 0.0 ),
@@ -12,13 +12,13 @@ grid_compressor::Quantization::Quantization( int quant_count ) :
 
 }
 
-grid_compressor::Quantizer::Quantizer( double left, double right )
+quantpressor::Quantizer::Quantizer( double left, double right )
 {
 	L = left;
 	R = right;
 }
 
-grid_compressor::Quantization grid_compressor::Quantizer::quantize( int quant_count, double max_error, const distributions::IDistribution & distribution ) const
+quantpressor::Quantization quantpressor::Quantizer::quantize( int quant_count, double max_error, const distributions::IDistribution & distribution ) const
 {
 	Quantization q( quant_count );
 
