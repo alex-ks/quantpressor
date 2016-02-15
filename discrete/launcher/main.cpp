@@ -401,8 +401,10 @@ int main/*_archive_empirical*/( )
 
 	double compression_time, decompression_time;
 
+	wstring archive_name = L"compressed.out";
+
 	{
-		FileOutputStream stream( L"output.txt" );
+		FileOutputStream stream( archive_name );
 		timer.start( );
 		compression_params = compressor.compress( grid, qs, stream );
 		compression_time = timer.stop( );
@@ -411,7 +413,7 @@ int main/*_archive_empirical*/( )
 	cout << "Compression time: " << compression_time << "s" << endl;
 
 	{
-		FileInputStream stream( L"output.txt" );
+		FileInputStream stream( archive_name );
 
 		timer.start( );
 		auto decompressed = compressor.decompress( stream );

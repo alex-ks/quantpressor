@@ -1,6 +1,6 @@
 #include "LZ77HuffmanCompressor.h"
 #include "utilities.h"
-#include "TreeNode.h"
+#include "huffman.h"
 #include <exception.h>
 
 

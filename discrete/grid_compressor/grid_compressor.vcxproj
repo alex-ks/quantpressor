@@ -135,7 +135,7 @@
     <ClInclude Include="IBinaryOutputStream.h" />
     <ClInclude Include="ICompressor.h" />
     <ClInclude Include="Quantizer.h" />
-    <ClInclude Include="TreeNode.h" />
+    <ClInclude Include="huffman.h" />
     <ClInclude Include="utilities.h" />
   </ItemGroup>
   <ItemGroup>

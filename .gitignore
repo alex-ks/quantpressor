@@ -200,3 +200,9 @@ FakesAssemblies/
 
 # Test tables
 *.csv
+*.xlsx
+
+# Archives
+*.rar
+*.zip
+*.out

@@ -45,9 +45,6 @@
     <ClInclude Include="IBinaryStream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TreeNode.h">
-      <Filter>Header Files\compressors</Filter>
-    </ClInclude>
     <ClInclude Include="HuffmanCompressor.h">
       <Filter>Header Files\compressors</Filter>
     </ClInclude>
@@ -62,6 +59,9 @@
     </ClInclude>
     <ClInclude Include="FileOutputStream.h">
       <Filter>Header Files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="huffman.h">
+      <Filter>Header Files\compressors</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
