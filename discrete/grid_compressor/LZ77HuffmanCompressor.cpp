@@ -8,14 +8,6 @@ namespace quantpressor
 {
 	namespace compressors
 	{
-		template <typename T> class DynamicHuffmanTree
-		{
-		private:
-			TreeNode *root;
-
-		public:
-		};
-
 		LZ77HuffmanCompressor::LZ77HuffmanCompressor( size_t window_width ) : width( window_width )
 		{
 			

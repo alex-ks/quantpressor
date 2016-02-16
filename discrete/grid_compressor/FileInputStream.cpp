@@ -136,6 +136,11 @@ namespace quantpressor
 			return read_smth( number );
 		}
 
+		IBinaryInputStream & FileInputStream::operator>>( char &c )
+		{
+			return read_smth( c );
+		}
+
 		IBinaryInputStream & FileInputStream::operator>>( byte &b )
 		{
 			return read_smth( b );

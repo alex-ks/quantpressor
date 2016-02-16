@@ -39,6 +39,7 @@ namespace quantpressor
 			virtual IBinaryOutputStream & operator<<( int ) override;
 			virtual IBinaryOutputStream & operator<<( unsigned int ) override;
 			virtual IBinaryOutputStream & operator<<( unsigned long long ) override;
+			virtual IBinaryOutputStream & operator<<( char ) override;
 			virtual IBinaryOutputStream & operator<<( byte ) override;
 			virtual IBinaryOutputStream & operator<<( double ) override;
 			virtual void write_bit( bool bit ) override;

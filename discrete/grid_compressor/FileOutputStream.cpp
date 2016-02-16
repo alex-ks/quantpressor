@@ -102,6 +102,11 @@ namespace quantpressor
 			return write_smth( num );
 		}
 
+		IBinaryOutputStream & FileOutputStream::operator<<( char c )
+		{
+			return write_smth( c );
+		}
+
 		IBinaryOutputStream &FileOutputStream::operator<<( byte b )
 		{
 			return write_smth( b );

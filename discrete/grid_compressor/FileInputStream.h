@@ -44,6 +44,7 @@ namespace quantpressor
 			virtual IBinaryInputStream & operator>>( int & ) override;
 			virtual IBinaryInputStream & operator>>( unsigned int & ) override;
 			virtual IBinaryInputStream & operator>>( unsigned long long & ) override;
+			virtual IBinaryInputStream & operator>>( char & ) override;
 			virtual IBinaryInputStream & operator>>( byte & ) override;
 			virtual IBinaryInputStream & operator>>( double & ) override;
 

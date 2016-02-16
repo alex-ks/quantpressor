@@ -330,7 +330,7 @@ int main_archive_normal( )
 	return 0;
 }
 
-int main/*_archive_empirical*/( )
+int main_archive_empirical( )
 {
 	auto reader = CsvReader( 1024 * 1024, L';' );
 	auto grid = reader.read( L"real_data.csv", false, false );
@@ -465,6 +465,39 @@ int main/*_archive_empirical*/( )
 
 	}
 
+
+	return 0;
+}
+
+#include <huffman.h>
+
+using quantpressor::compressors::DynamicHuffmanTree;
+
+int main( )
+{
+	map<char, ull> freq;
+
+	freq['a'] = 1;
+	freq['b'] = 2;
+
+	DynamicHuffmanTree<char> tree( freq, -1 );
+
+	std::wstring file_name = L"tree.out";
+
+	{
+		auto stream = FileOutputStream( file_name );
+		tree.serialize( stream );
+	}
+
+	{
+		auto stream = FileInputStream( file_name );
+		auto tree_copy = DynamicHuffmanTree<char>::deserialize( stream, -1 );
+		tree_copy.assume_frequences( freq );
+	}
+
+	bool res = tree.add_new_symbol( 'a' );
+	res = tree.add_new_symbol( 'a' );
+	res = tree.add_new_symbol( 'c' );
 
 	return 0;
 }

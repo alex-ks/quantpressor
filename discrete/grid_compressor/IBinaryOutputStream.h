@@ -10,6 +10,7 @@ namespace quantpressor
 		virtual IBinaryOutputStream &operator<<( int ) = 0;
 		virtual IBinaryOutputStream &operator<<( unsigned int ) = 0;
 		virtual IBinaryOutputStream &operator<<( unsigned long long ) = 0;
+		virtual IBinaryOutputStream &operator<<( char ) = 0;
 		virtual IBinaryOutputStream &operator<<( byte ) = 0;
 		virtual IBinaryOutputStream &operator<<( double ) = 0;
 
