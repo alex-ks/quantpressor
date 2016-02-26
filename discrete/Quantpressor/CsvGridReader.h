@@ -10,7 +10,7 @@ namespace Quantpressor
 		public ref class CsvGridReader : public IGridReader
 		{
 		private:
-			io::CsvReader *reader;
+			quantpressor::io::CsvReader *reader;
 
 		public:
 			CsvGridReader( int bufferSize, System::Char columnDelimeter );

@@ -6,7 +6,7 @@ namespace Quantpressor
 {
 	namespace FileIO
 	{
-		grid_compressor::FileOutputStream *FileOutputStream::NativePtr( )
+		quantpressor::io::FileOutputStream *FileOutputStream::NativePtr( )
 		{
 			if ( nativeStream == nullptr )
 				throw gcnew System::ObjectDisposedException( this->ToString( ) );
@@ -16,7 +16,7 @@ namespace Quantpressor
 		FileOutputStream::FileOutputStream( System::String ^ fileName )
 		{
 			pin_ptr<const wchar_t> wpath = PtrToStringChars( fileName );
-			nativeStream = new grid_compressor::FileOutputStream( wpath );
+			nativeStream = new quantpressor::io::FileOutputStream( wpath );
 		}
 
 		FileOutputStream::~FileOutputStream( )

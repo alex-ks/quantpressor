@@ -6,7 +6,10 @@
         xmlns:local="clr-namespace:Quantpressor.UI.Views"
         xmlns:cal="http://www.caliburnproject.org"
         mc:Ignorable="d"
-        Title="MainView" Height="170" Width="300" ResizeMode="NoResize">
+        Title="MainView" 
+        Height="170" 
+        Width="300" 
+        ResizeMode="NoResize">
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>

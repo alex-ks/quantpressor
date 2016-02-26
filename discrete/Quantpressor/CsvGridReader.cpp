@@ -10,7 +10,7 @@ namespace Quantpressor
 	{
 		CsvGridReader::CsvGridReader( int bufferSize, System::Char columnDelimeter )
 		{
-			reader = new io::CsvReader( bufferSize, columnDelimeter );
+			reader = new quantpressor::io::CsvReader( bufferSize, columnDelimeter );
 		}
 
 		CsvGridReader::~CsvGridReader( )

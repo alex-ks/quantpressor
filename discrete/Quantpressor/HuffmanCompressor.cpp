@@ -25,7 +25,7 @@ namespace Quantpressor
 			array<double> ^bpss, ^realVariances, ^min, ^max, ^avg;
 
 		internal:
-			NativeCompressionResultCopy( const grid_compressor::CompressionResult &compResult )
+			NativeCompressionResultCopy( const quantpressor::CompressionResult &compResult )
 			{
 				bpss = VectorToArray( compResult.columns_bps );
 				realVariances = VectorToArray( compResult.real_variances );
@@ -63,7 +63,7 @@ namespace Quantpressor
 
 		HuffmanCompressor::HuffmanCompressor( )
 		{
-			nativeCompressor = new huffman::HuffmanCompressor( );
+			nativeCompressor = new quantpressor::compressors::HuffmanCompressor( );
 		}
 
 		HuffmanCompressor::!HuffmanCompressor( )
@@ -79,12 +79,12 @@ namespace Quantpressor
 
 #include <stdio.h>
 
-		grid_compressor::CompressionResult CompressGrid( grid_compressor::ICompressor &compressor,
-														 const module_api::pIGrid &grid,
-														 grid_compressor::Quantizations &qs,
-														 grid_compressor::IBinaryOutputStream &stream )
+		quantpressor::CompressionResult CompressGrid( quantpressor::ICompressor &compressor,
+													  const module_api::pIGrid &grid,
+													  quantpressor::Quantizations &qs,
+													  quantpressor::IBinaryOutputStream &stream )
 		{
-			freopen( "out.txt", "w", stdout );
+			/*freopen( "out.txt", "w", stdout );
 			for ( auto &q : qs )
 			{
 				for ( auto &b : q.borders )
@@ -95,7 +95,7 @@ namespace Quantpressor
 					printf( "%lf ", b );
 				printf( "\n" );
 			}
-			fflush( stdout );
+			fflush( stdout );*/
 			return compressor.compress( grid, qs, stream );
 		}
 
@@ -117,7 +117,7 @@ namespace Quantpressor
 
 			auto &nativeStream = *streamWrapper->NativePtr( );
 
-			grid_compressor::Quantizations qs;
+			quantpressor::Quantizations qs;
 
 			for each ( auto q in quantizations )
 			{
@@ -127,7 +127,7 @@ namespace Quantpressor
 					auto Borders = q->Borders;
 					auto Codes = q->Codes;
 
-					grid_compressor::Quantization quant( Borders->Length );
+					quantpressor::Quantization quant( Borders->Length );
 					for ( int i = 0; i < Borders->Length; ++i )
 					{
 						quant.borders[i] = Borders[i];

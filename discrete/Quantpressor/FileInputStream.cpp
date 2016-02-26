@@ -3,7 +3,7 @@
 
 #include <vcclr.h>
 
-grid_compressor::FileInputStream * Quantpressor::FileIO::FileInputStream::NativePtr( )
+quantpressor::io::FileInputStream * Quantpressor::FileIO::FileInputStream::NativePtr( )
 {
 	if ( nativeStream == nullptr )
 		throw gcnew System::ObjectDisposedException( this->ToString( ) );
@@ -13,7 +13,7 @@ grid_compressor::FileInputStream * Quantpressor::FileIO::FileInputStream::Native
 Quantpressor::FileIO::FileInputStream::FileInputStream( System::String ^fileName )
 {
 	pin_ptr<const wchar_t> wpath = PtrToStringChars( fileName );
-	nativeStream = new grid_compressor::FileInputStream( wpath );
+	nativeStream = new quantpressor::io::FileInputStream( wpath );
 }
 
 Quantpressor::FileIO::FileInputStream::~FileInputStream( )
@@ -33,7 +33,7 @@ Quantpressor::FileIO::FileInputStream::!FileInputStream( )
 
 #pragma unmanaged
 
-template<typename T> T ReadSmth( grid_compressor::FileInputStream &stream )
+template<typename T> T ReadSmth( quantpressor::io::FileInputStream &stream )
 {
 	T result;
 	stream >> result;

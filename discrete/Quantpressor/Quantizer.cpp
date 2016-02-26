@@ -7,7 +7,7 @@ namespace Quantpressor
 {
 	Quantizer::Quantizer( double left, double right )
 	{
-		quantizer = new grid_compressor::Quantizer( left, right );
+		quantizer = new quantpressor::Quantizer( left, right );
 	}
 
 	Quantizer::!Quantizer( )

@@ -10,7 +10,7 @@ namespace Quantpressor
 		public ref class HuffmanCompressor : public ICompressor
 		{
 		private:
-			huffman::HuffmanCompressor *nativeCompressor;
+			quantpressor::compressors::HuffmanCompressor *nativeCompressor;
 
 		public:
 			HuffmanCompressor( );

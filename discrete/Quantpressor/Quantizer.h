@@ -8,7 +8,7 @@ namespace Quantpressor
 	public ref class Quantizer
 	{
 	private:
-		grid_compressor::Quantizer *quantizer;
+		quantpressor::Quantizer *quantizer;
 
 	public:
 		Quantizer( double left, double right );

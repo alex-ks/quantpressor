@@ -31,37 +31,37 @@ namespace Quantpressor.UI.ViewModels
 				Result.Columns.Add( $"Column #{i + 1}" );
 			}
 
-			var bordersList = new List<string> {"Values interval"};
+			var bordersList = new List<object> {"Values interval"};
 			bordersList.AddRange( leftBorders.Select( ( t, i ) => $"[{t}; {rightBorders[i]}]" ) );
-			Result.Rows.Add( bordersList );
+			Result.Rows.Add( bordersList.ToArray( ) );
 
-			var entropyList = new List<string> {"Entropy"};
+			var entropyList = new List<object> {"Entropy"};
 			entropyList.AddRange( quantizations.Select( q => $"{q.Entropy}" ) );
-			Result.Rows.Add( entropyList );
+			Result.Rows.Add( entropyList.ToArray( ) );
 
-			var bpsVariances = new List<string> { "Real variance" };
-			bpsVariances.AddRange( compressionResult.ColumnsBitsPerSymbol.Select( d => $"{d}" ) );
-			Result.Rows.Add( bpsVariances );
+			var bpsList = new List<object> { "Bits per symbol" };
+			bpsList.AddRange( compressionResult.ColumnsBitsPerSymbol.Select( d => $"{d}" ) );
+			Result.Rows.Add( bpsList.ToArray( ) );
 
-			var varianceList = new List<string> { "Expected variance" };
+			var varianceList = new List<object> { "Expected variance" };
 			varianceList.AddRange( quantizations.Select( q => $"{q.Variance}" ) );
-			Result.Rows.Add( varianceList );
+			Result.Rows.Add( varianceList.ToArray( ) );
 
-			var realVariances = new List<string> {"Real variance"};
+			var realVariances = new List<object> {"Real variance"};
 			realVariances.AddRange( compressionResult.RealVariances.Select( d => $"{d}" ) );
-			Result.Rows.Add( realVariances );
+			Result.Rows.Add( realVariances.ToArray( ) );
 
-			var minErrors = new List<string> {"Minimal error"};
+			var minErrors = new List<object> {"Minimal error"};
 			minErrors.AddRange( compressionResult.MinErrors.Select( d => $"{d}" ) );
-			Result.Rows.Add( minErrors );
+			Result.Rows.Add( minErrors.ToArray( ) );
 
-			var maxErrors = new List<string> { "Maximal error" };
+			var maxErrors = new List<object> { "Maximal error" };
 			maxErrors.AddRange( compressionResult.MaxErrors.Select( d => $"{d}" ) );
-			Result.Rows.Add( maxErrors );
+			Result.Rows.Add( maxErrors.ToArray( ) );
 
-			var avgErrors = new List<string> { "Avgimal error" };
+			var avgErrors = new List<object> { "Avgimal error" };
 			avgErrors.AddRange( compressionResult.AvgErrors.Select( d => $"{d}" ) );
-			Result.Rows.Add( avgErrors );
+			Result.Rows.Add( avgErrors.ToArray( ) );
 
 			Plots = new BindableCollection<TabItem>( );
 			for ( int i = 0; i < leftBorders.Length; ++i )

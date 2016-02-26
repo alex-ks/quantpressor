@@ -3,14 +3,14 @@
 
 using namespace Quantpressor;
 
-grid_compressor::Quantization NativeQuantization::NativeStruct( )
+quantpressor::Quantization NativeQuantization::NativeStruct( )
 {
 	return *nativeQuantization;
 }
 
-Quantpressor::NativeQuantization::NativeQuantization( grid_compressor::Quantization && quantization )
+Quantpressor::NativeQuantization::NativeQuantization( quantpressor::Quantization && quantization )
 {
-	nativeQuantization = new grid_compressor::Quantization( 1 );
+	nativeQuantization = new quantpressor::Quantization( 1 );
 	*nativeQuantization = std::move( quantization );
 }
 

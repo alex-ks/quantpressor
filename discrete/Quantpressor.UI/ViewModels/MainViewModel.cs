@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using Caliburn.Micro;
@@ -24,11 +25,22 @@ namespace Quantpressor.UI.ViewModels
 			set { _error = double.Parse( value ); }
 		}
 
-		private int _quantCount = 100;
+		private int? _quantCount = 100;
 		public string QuantCount
 		{
-			get { return _quantCount.ToString( ); }
-			set { _quantCount = int.Parse( value ); }
+			get { return _quantCount != null ? _quantCount.ToString( ) : ""; }
+			set
+			{
+				int quantCount;
+				if ( int.TryParse( value, out quantCount ) )
+				{
+					_quantCount = quantCount;
+				}
+				else
+				{
+					_quantCount = null;
+				}
+			}
 		}
 
 		public MainViewModel( IWindowManager manager )
@@ -36,7 +48,7 @@ namespace Quantpressor.UI.ViewModels
 			_manager = manager;
 		}
 
-		private IGrid OpenGrid( )
+		private async Task<IGrid> OpenGrid( )
 		{
 			OpenFileDialog openFileDialog = new OpenFileDialog
 			{
@@ -48,13 +60,13 @@ namespace Quantpressor.UI.ViewModels
 				return null;
 
 			var reader = new CsvGridReader( 1024 * 1024, ';' );
-			return reader.Read( openFileDialog.FileName, false, false );
-			//var openTask = new Task<IGrid>( ( ) => reader.Read( openFileDialog.FileName, false, false ) );
-			//openTask.Start( );
-			//return await openTask;
+			//return reader.Read( openFileDialog.FileName, false, false );
+			var openTask = new Task<IGrid>( ( ) => reader.Read( openFileDialog.FileName, false, false ) );
+			openTask.Start( );
+			return await openTask;
 		}
 
-		private void CompressAndShow( IGrid grid, string outName, ProgressViewModel progressBar )
+		private Func<CompressionResultViewModel> CompressAndShow( IGrid grid, string outName, ProgressViewModel progressBar )
 		{
 			var distrs = new List<IDistribution>( );
 			double[] leftBorders = new double[grid.ColumnCount];
@@ -80,8 +92,8 @@ namespace Quantpressor.UI.ViewModels
 					rightBorders[column] = rightBorders[column] > value ? rightBorders[column] : value;
 				}
 
-				var quantizer = new Quantizer( leftBorders[column], rightBorders[column] );
-				quantizations.Add( quantizer.Quantize( _quantCount, _error, distr ) );
+				var quantizer = new Quantizer( leftBorders[column] - _error, rightBorders[column] + _error );
+				quantizations.Add( quantizer.Quantize( _quantCount.Value, _error, distr ) );
 			}
 
 			progressBar.Status = "Writing archive...";
@@ -95,18 +107,21 @@ namespace Quantpressor.UI.ViewModels
 				result = compressor.Compress( grid, quantizations, stream );
 			}
 
-			MessageBox.Show( "Compressed" );
-
 			progressBar.Progress = 1.0;
 			progressBar.TryClose( );
 
-			var resultViewModel = new CompressionResultViewModel( result, leftBorders, rightBorders, quantizations, distrs );
-			_manager.ShowWindow( resultViewModel );
+			return ( ) => new CompressionResultViewModel( result, leftBorders, rightBorders, quantizations, distrs );
 		}
 
-		public void Compress( )
+		public async void Compress( )
 		{
-			var grid = OpenGrid( );
+			if ( _quantCount == null )
+			{
+				MessageBox.Show( "Enter correct quant count", "Error", MessageBoxButton.OK, MessageBoxImage.Error );
+				return;
+			}
+
+			var grid = await OpenGrid( );
 
 			if ( grid == null )
 				return;
@@ -126,22 +141,25 @@ namespace Quantpressor.UI.ViewModels
 			var progressBar = new ProgressViewModel( );
 
 			dynamic settings = new ExpandoObject( );
-			settings.Height = 100;
+			settings.Height = 130;
 			settings.Width = 500;
 			settings.SizeToContent = SizeToContent.Manual;
 
 			_manager.ShowWindow( progressBar, null, settings );
 
-			CompressAndShow( grid, outName, progressBar );
+			var compressTask = Task.Factory.StartNew( ( ) => CompressAndShow( grid, outName, progressBar ) );
 
-			//var compressTask = new Task( ( ) =>
-			//{
-			//	CompressAndShow( grid, outName, progressBar );
-			//} );
+			var createResultViewModel = await compressTask;
 
-			//compressTask.Start( );
+			dynamic resultSettings = new ExpandoObject( );
+			resultSettings.Height = 450;
+			resultSettings.MinHeight = 180;
+			resultSettings.Width = 800;
+			resultSettings.MinWidth = 320;
+			resultSettings.Title = "Report";
+			resultSettings.SizeToContent = SizeToContent.Manual;
 
-			//await compressTask;
+			_manager.ShowWindow( createResultViewModel( ), null, resultSettings );
 		}
 	}
 }

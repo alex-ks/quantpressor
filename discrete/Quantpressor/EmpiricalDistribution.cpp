@@ -1,4 +1,5 @@
 #include "EmpiricalDistribution.h"
+#include "NativeGrid.h"
 
 #include <vector>
 
@@ -9,14 +10,13 @@ const int DEFAULT_SAMPLE_COUNT = 1e3;
 
 #pragma unmanaged
 
-#define _USE_MATH_DEFINES
-#include <math.h>
+#include <random>
 
 distributions::FastEmpiricalDistribution *CreateNativeDisribution( std::vector<double> &&sample )
 {
 	distributions::DetailedApproximationMethod method;
 
-	double k = 1.0 / sqrt( 2 * M_PI );
+	double k = 1.0 / sqrt( 2 * std::_Pi );
 	const double _sq2 = 1.0 / sqrt( 2.0 );
 
 	method.kernel = [k]( double r ) { return k * exp( -0.5 * r * r ); };
@@ -41,6 +41,35 @@ distributions::FastEmpiricalDistribution *CreateNativeDisribution( std::vector<d
 	return new distributions::FastEmpiricalDistribution( std::move( sample ), method );
 }
 
+distributions::FastEmpiricalDistribution *CreateNativeDisribution( const module_api::pIGrid &grid, module_api::uint column )
+{
+	distributions::DetailedApproximationMethod method;
+
+	double k = 1.0 / sqrt( 2 * std::_Pi );
+	const double _sq2 = 1.0 / sqrt( 2.0 );
+
+	method.kernel = [k]( double r ) { return k * exp( -0.5 * r * r ); };
+	method.kernel_integral = [_sq2]( double a, double b )
+	{
+		return 0.5 * ( std::erf( b * _sq2 ) - std::erf( a * _sq2 ) );
+	};
+	method.kernel_moment_1 = [k]( double a, double b )
+	{
+		return -k * ( exp( -0.5 * b * b ) - exp( -0.5 * a * a ) );
+	};
+
+	auto m2_func = [k, _sq2]( double x ) { return 0.5 * std::erf( x * _sq2 ) - k * x * exp( -0.5 * x * x ); };
+
+	method.kernel_moment_2 = [m2_func]( double a, double b )
+	{
+		return m2_func( b ) - m2_func( a );
+	};
+
+	method.window = 0.35;
+
+	return new distributions::FastEmpiricalDistribution( grid, column, method );
+}
+
 void DeleteNativeDistribution( distributions::FastEmpiricalDistribution *distr )
 {
 	delete distr;
@@ -59,7 +88,7 @@ EmpiricalDistribution::EmpiricalDistribution( IGrid ^grid, int column, int maxSa
 		count = maxSampleCount;
 	}
 
-	std::vector<double> sample( maxSampleCount );
+	std::vector<double> sample( count );
 
 	for ( int i = 0; i < count; ++i )
 	{
@@ -67,6 +96,25 @@ EmpiricalDistribution::EmpiricalDistribution( IGrid ^grid, int column, int maxSa
 	}
 
 	nativeDistribution = CreateNativeDisribution( std::move( sample ) );
+
+	/*auto wrapper = dynamic_cast< NativeGrid ^ > ( grid );
+
+	if ( wrapper != nullptr )
+	{
+		module_api::pIGrid nativeGrid = wrapper->NativePtr( );
+		nativeDistribution = CreateNativeDisribution( nativeGrid, column );
+	}
+	else
+	{
+		std::vector<double> sample( count );
+
+		for ( int i = 0; i < count; ++i )
+		{
+			sample[i] = grid->GetValue( i * step, column );
+		}
+
+		nativeDistribution = CreateNativeDisribution( std::move( sample ) );
+	}*/
 }
 
 EmpiricalDistribution::EmpiricalDistribution( IGrid ^grid, int column ) : EmpiricalDistribution( grid, column, DEFAULT_SAMPLE_COUNT )

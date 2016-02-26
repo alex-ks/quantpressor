@@ -8,13 +8,13 @@ namespace Quantpressor
 	ref class NativeQuantization : public IQuantization
 	{
 	private:
-		grid_compressor::Quantization *nativeQuantization;
+		quantpressor::Quantization *nativeQuantization;
 
 	internal:
-		grid_compressor::Quantization NativeStruct( );
+		quantpressor::Quantization NativeStruct( );
 
 	public:
-		NativeQuantization( grid_compressor::Quantization &&quantization );
+		NativeQuantization( quantpressor::Quantization &&quantization );
 		!NativeQuantization( );
 
 		virtual property array<double>^ Borders 

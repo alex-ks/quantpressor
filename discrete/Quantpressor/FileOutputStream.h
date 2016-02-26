@@ -10,10 +10,10 @@ namespace Quantpressor
 		public ref class FileOutputStream : public IBinaryOutputStream
 		{
 		private:
-			grid_compressor::FileOutputStream *nativeStream;
+			quantpressor::io::FileOutputStream *nativeStream;
 
 		internal:
-			grid_compressor::FileOutputStream *NativePtr( );
+			quantpressor::io::FileOutputStream *NativePtr( );
 
 		public:
 			FileOutputStream( System::String ^fileName );

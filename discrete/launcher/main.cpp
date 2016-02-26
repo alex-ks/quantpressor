@@ -473,7 +473,7 @@ int main_archive_empirical( )
 
 using quantpressor::compressors::DynamicHuffmanTree;
 
-int main( )
+int main_dynamic_huffman( )
 {
 	map<char, ull> freq;
 
@@ -498,6 +498,61 @@ int main( )
 	bool res = tree.add_new_symbol( 'a' );
 	res = tree.add_new_symbol( 'a' );
 	res = tree.add_new_symbol( 'c' );
+
+	return 0;
+}
+
+int main( )
+{
+	pIGrid grid;
+
+	{
+		auto reader = CsvReader( 1024 * 1024, L';' );
+		grid = reader.read( L"real_data.csv", false, false );
+	}
+
+	double k = 1.0 / sqrt( 2 * _Pi );
+	const double _sq2 = 1.0 / sqrt( 2.0 );
+	auto gauss_kernel = [k]( double r ) { return k * exp( -0.5 * r * r ); };
+	DetailedApproximationMethod method;
+	method.kernel = gauss_kernel;
+	method.kernel_integral = [_sq2]( double a, double b )
+	{
+		return 0.5 * ( std::erf( b * _sq2 ) - std::erf( a * _sq2 ) );
+	};
+	method.kernel_moment_1 = [k]( double a, double b )
+	{
+		return -k * ( exp( -0.5 * b * b ) - exp( -0.5 * a * a ) );
+	};
+
+	auto m2_func = [k, _sq2]( double x ) { return 0.5 * std::erf( x * _sq2 ) - k * x * exp( -0.5 * x * x ); };
+
+	method.kernel_moment_2 = [m2_func]( double a, double b )
+	{
+		return m2_func( b ) - m2_func( a );
+	};
+	method.window = 0.35;
+
+	auto grid_driven = FastEmpiricalDistribution( grid, 0, method );
+
+	auto count = grid->get_row_count( );
+	int step = 1;
+	auto maxSampleCount = 1000U;
+
+	if ( count > maxSampleCount )
+	{
+		step = count / maxSampleCount;
+		count = maxSampleCount;
+	}
+
+	std::vector<double> sample( count );
+
+	for ( int i = 0; i < count; ++i )
+	{
+		sample[i] = grid->get_value( i * step, 0 );
+	}
+
+	auto sample_driven = FastEmpiricalDistribution( std::move( sample ), method );
 
 	return 0;
 }
