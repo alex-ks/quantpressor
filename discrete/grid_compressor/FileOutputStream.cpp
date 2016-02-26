@@ -68,6 +68,11 @@ namespace quantpressor
 			buffered_bits = buffered_bits_count = 0;
 		}
 
+		ull FileOutputStream::get_current_position( ) const
+		{
+			return position;
+		}
+
 		void FileOutputStream::write_bit( bool bit )
 		{
 			++buffered_bits_count;
@@ -85,6 +90,8 @@ namespace quantpressor
 				std::fwrite( buffered_bytes.c_str( ), sizeof( char ), buffered_bytes.size( ), file );
 				buffered_bytes.clear( );
 			}
+
+			++position;
 		}
 
 		IBinaryOutputStream &FileOutputStream::operator<<( int num )

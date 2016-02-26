@@ -5,7 +5,6 @@ namespace quantpressor
 	typedef unsigned char byte;
 	typedef unsigned long long ull;
 
-	//todo: inherit i/o streams from this
 	class IBinaryStream
 	{
 	public:

@@ -27,9 +27,9 @@ namespace quantpressor
 		///</summary>
 		virtual CompressionResult compress( const module_api::pIGrid &grid,
 											const Quantizations &quantizations,
-											const IBinaryOutputStream &stream ) = 0;
+											IBinaryOutputStream &stream ) = 0;
 
-		virtual module_api::pIGrid decompress( const IBinaryInputStream &stream ) = 0;
+		virtual module_api::pIGrid decompress( IBinaryInputStream &stream ) = 0;
 
 		virtual ~ICompressor( ) { }
 	};

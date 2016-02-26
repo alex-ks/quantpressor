@@ -63,6 +63,9 @@
     <ClInclude Include="huffman.h">
       <Filter>Header Files\compressors</Filter>
     </ClInclude>
+    <ClInclude Include="TripletHandlers.h">
+      <Filter>Header Files\compressors</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Quantizer.cpp">

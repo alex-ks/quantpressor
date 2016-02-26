@@ -4,7 +4,7 @@
 
 namespace quantpressor
 {
-	class IBinaryOutputStream
+	class IBinaryOutputStream : public IBinaryStream
 	{
 	public:
 		virtual IBinaryOutputStream &operator<<( int ) = 0;

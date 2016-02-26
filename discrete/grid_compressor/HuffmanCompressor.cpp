@@ -18,6 +18,7 @@ namespace quantpressor
 	namespace compressors
 	{
 		using namespace quantpressor;
+		using namespace huffman;
 
 		using module_api::uint;
 		using module_api::pIGrid;
@@ -31,7 +32,7 @@ namespace quantpressor
 		HuffmanCompressor::ColumnInfo HuffmanCompressor::compress_column( uint column,
 																		  const pIGrid &grid,
 																		  const Quantization &quantization,
-																		  const IBinaryOutputStream &s )
+																		  IBinaryOutputStream &s )
 		{
 			ColumnInfo result = ColumnInfo( );
 			result.min = std::numeric_limits<double>::max( );
@@ -97,9 +98,8 @@ namespace quantpressor
 
 		CompressionResult HuffmanCompressor::compress( const pIGrid &grid,
 													   const Quantizations &quantizations,
-													   const IBinaryOutputStream &s )
+													   IBinaryOutputStream &stream )
 		{
-			auto &stream = const_cast< IBinaryOutputStream & >( s );
 			stream << grid->get_row_count( );
 			stream << grid->get_column_count( );
 
@@ -112,7 +112,7 @@ namespace quantpressor
 
 			for ( uint i = 0; i < grid->get_column_count( ); ++i )
 			{
-				auto info = compress_column( i, grid, quantizations[i], s );
+				auto info = compress_column( i, grid, quantizations[i], stream );
 				result.columns_bps.push_back( info.bps );
 				result.real_variances.push_back( info.dx );
 				result.min_errors.push_back( info.min );
@@ -123,9 +123,8 @@ namespace quantpressor
 			return std::move( result );
 		}
 
-		module_api::pIGrid HuffmanCompressor::decompress( const quantpressor::IBinaryInputStream &s )
+		module_api::pIGrid HuffmanCompressor::decompress( quantpressor::IBinaryInputStream &stream )
 		{
-			auto &stream = const_cast< IBinaryInputStream & > ( s );
 			unsigned int row_count, column_count;
 			stream >> row_count;
 			stream >> column_count;

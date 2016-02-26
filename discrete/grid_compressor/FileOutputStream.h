@@ -18,6 +18,7 @@ namespace quantpressor
 			byte buffered_bits;
 			int buffered_bits_count;
 			std::string buffered_bytes;
+			ull position;
 
 			template<typename T> inline IBinaryOutputStream &write_smth( T smth )
 			{
@@ -46,6 +47,8 @@ namespace quantpressor
 			virtual void write_bytes( byte *bytes, unsigned int count ) override;
 
 			virtual void flush( ) override;
+
+			virtual ull get_current_position( ) const override;
 		};
 	}
 }

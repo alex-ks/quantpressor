@@ -1,5 +1,6 @@
 #pragma once
 #include "ICompressor.h"
+#include "TripletHandlers.h"
 
 #include <deque>
 
@@ -11,24 +12,23 @@ namespace quantpressor
 
 		class LZ77HuffmanCompressor : public ICompressor
 		{
-			size_t width;
+			width_t width;
 
 		public:
-			LZ77HuffmanCompressor( size_t window_width );
+			LZ77HuffmanCompressor( width_t window_width );
 
-			virtual CompressionResult compress( const module_api::pIGrid & grid, const Quantizations & quantizations, const IBinaryOutputStream & stream ) override;
+			virtual CompressionResult compress( const module_api::pIGrid & grid, const Quantizations & quantizations, IBinaryOutputStream &stream ) override;
 
-			virtual module_api::pIGrid decompress( const IBinaryInputStream & stream ) override;
-
+			virtual module_api::pIGrid decompress( IBinaryInputStream &stream ) override;
 		};
 
 		template <typename T> class Window : public std::deque<T>
 		{
 		private:
-			size_t window_width;
+			width_t window_width;
 
 		public:
-			Window( size_t width ) : window_width( width )
+			Window( width_t width ) : window_width( width )
 			{
 				
 			}

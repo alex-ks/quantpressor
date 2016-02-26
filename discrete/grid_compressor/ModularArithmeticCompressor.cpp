@@ -73,12 +73,12 @@ namespace quantpressor
 
 		CompressionResult ModularArithmeticCompressor::compress( const module_api::pIGrid &grid,
 																 const quantpressor::Quantizations &quantizations,
-																 const quantpressor::IBinaryOutputStream &s )
+																 quantpressor::IBinaryOutputStream &s )
 		{
 			throw module_api::NotImplementedException( );
 		}
 
-		module_api::pIGrid ModularArithmeticCompressor::decompress( const quantpressor::IBinaryInputStream &stream )
+		module_api::pIGrid ModularArithmeticCompressor::decompress( quantpressor::IBinaryInputStream &stream )
 		{
 			throw module_api::NotImplementedException( );
 		}

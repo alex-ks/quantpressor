@@ -471,7 +471,7 @@ int main_archive_empirical( )
 
 #include <huffman.h>
 
-using quantpressor::compressors::DynamicHuffmanTree;
+using namespace quantpressor::compressors::huffman;
 
 int main_dynamic_huffman( )
 {

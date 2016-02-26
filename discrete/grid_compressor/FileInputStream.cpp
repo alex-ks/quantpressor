@@ -18,6 +18,8 @@ namespace quantpressor
 			{
 				throw module_api::Exception( L"Cannot open the file" );
 			}
+
+			position = 0;
 		}
 
 		FileInputStream::FileInputStream( FileInputStream && stream )
@@ -86,6 +88,8 @@ namespace quantpressor
 			buffered_bits <<= 1;
 			--buffered_bits_count;
 
+			++position;
+
 			return result;
 		}
 
@@ -119,6 +123,11 @@ namespace quantpressor
 		bool FileInputStream::end_of_stream( )
 		{
 			return eof && ( buffered_count == next_unread ) && ( buffered_bits_count == 0 );
+		}
+
+		ull FileInputStream::get_current_position( ) const
+		{
+			return position;
 		}
 
 		IBinaryInputStream & FileInputStream::operator>>( int &number )

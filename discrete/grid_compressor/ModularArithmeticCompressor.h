@@ -27,9 +27,9 @@ namespace quantpressor
 
 			quantpressor::CompressionResult compress( const module_api::pIGrid &grid,
 													  const quantpressor::Quantizations &quantizations,
-													  const quantpressor::IBinaryOutputStream &stream ) override;
+													  quantpressor::IBinaryOutputStream &stream ) override;
 
-			module_api::pIGrid decompress( const quantpressor::IBinaryInputStream &stream ) override;
+			module_api::pIGrid decompress( quantpressor::IBinaryInputStream &stream ) override;
 		};
 	}
 }

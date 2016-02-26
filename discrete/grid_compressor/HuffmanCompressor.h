@@ -19,14 +19,14 @@ namespace quantpressor
 			ColumnInfo compress_column( module_api::uint column,
 										const module_api::pIGrid &grid,
 										const quantpressor::Quantization &quantization,
-										const quantpressor::IBinaryOutputStream &stream );
+										quantpressor::IBinaryOutputStream &stream );
 
 		public:
 			virtual quantpressor::CompressionResult compress( const module_api::pIGrid &grid,
 															  const quantpressor::Quantizations &quantizations,
-															  const quantpressor::IBinaryOutputStream &stream ) override;
+															  quantpressor::IBinaryOutputStream &stream ) override;
 
-			virtual module_api::pIGrid decompress( const quantpressor::IBinaryInputStream &stream ) override;
+			virtual module_api::pIGrid decompress( quantpressor::IBinaryInputStream &stream ) override;
 		};
 	}
 }

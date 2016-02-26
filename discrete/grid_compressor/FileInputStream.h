@@ -20,6 +20,7 @@ namespace quantpressor
 			byte *buffered_bytes;
 			unsigned int buffered_count, next_unread;
 			bool eof = false;
+			ull position;
 
 			template<typename T> inline IBinaryInputStream &read_smth( T &smth )
 			{
@@ -52,6 +53,8 @@ namespace quantpressor
 			virtual unsigned int read_bytes( byte * bytes, unsigned int count ) override;
 
 			virtual bool end_of_stream( ) override;
+
+			virtual ull get_current_position( ) const override;
 		};
 	}
 }
