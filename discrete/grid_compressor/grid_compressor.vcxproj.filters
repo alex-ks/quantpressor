@@ -92,5 +92,8 @@
     <ClCompile Include="LZ77HuffmanCompressor.cpp">
       <Filter>Source Files\compressors</Filter>
     </ClCompile>
+    <ClCompile Include="TripletHandlers.cpp">
+      <Filter>Source Files\compressors</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

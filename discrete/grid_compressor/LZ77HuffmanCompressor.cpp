@@ -2,6 +2,7 @@
 #include "utilities.h"
 #include "huffman.h"
 #include <exception.h>
+#include <RoughGrid.h>
 
 namespace quantpressor
 {
@@ -10,8 +11,10 @@ namespace quantpressor
 		using std::vector;
 		using std::map;
 		using module_api::uint;
+		using module_api::make_heap_aware;
 		using huffman::HuffmanTree;
 		using huffman::DynamicHuffmanTree;
+		using igor::RoughGrid;
 
 		struct ColumnInfo
 		{
@@ -83,7 +86,7 @@ namespace quantpressor
 
 			auto symbol_count = index_t( row_count ) * column_count - 1;
 
-			auto writer = TripletWriter( stream );
+			auto writer = TripletWriter( stream, width );
 
 			for ( index_t i = 0; i < symbol_count; ++i )
 			{
@@ -122,17 +125,56 @@ namespace quantpressor
 				curr_column = ++curr_column % column_count;
 			}
 
+			writer.flush( );
+
 			auto bps = double( stream.get_current_position( ) - start_pos ) / ( symbol_count + 1 );
 
 			for ( int i = 0; i < column_count; ++i )
-				result.columns_bps[i] = bps;
+				result.columns_bps.push_back( bps );
 
 			return result;
 		}
 
 		module_api::pIGrid LZ77HuffmanCompressor::decompress( IBinaryInputStream &stream )
 		{
-			throw module_api::NotImplementedException( );
+			uint column_count, row_count;
+			stream >> row_count >> column_count;
+
+			vector<HuffmanTree<double>> symbol_trees;
+			for ( uint i = 0; i < column_count; ++i )
+			{
+				symbol_trees.push_back( HuffmanTree<double>::deserialize( stream ) );
+			}
+
+			auto reader = TripletReader( stream, width, std::move( symbol_trees ) );
+			auto result = make_heap_aware<RoughGrid>( row_count, column_count );
+			vector<width_t> dist_cache, length_cache;
+
+			auto symbol_count = index_t( column_count ) * row_count;
+
+			index_t window_start = 0;
+
+			for ( index_t i = 0; i < symbol_count; ++i )
+			{
+				width_t distance, length;
+				double value;
+				reader.read_triplet( &distance, &length, &value );
+
+				for ( index_t j = window_start + distance; j < window_start + distance + length; ++j, ++i )
+				{
+					result->set_value( i / column_count, i % column_count,
+									   result->get_value( j / column_count, j % column_count ) );
+				}
+
+				result->set_value( i / column_count, i % column_count, value );
+
+				if ( i - window_start > width )
+				{
+					window_start += i - window_start - width;
+				}
+			}
+
+			return result;
 		}
 	}
 }

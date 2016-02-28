@@ -502,7 +502,7 @@ int main_dynamic_huffman( )
 	return 0;
 }
 
-int main( )
+int main_fast_empirical( )
 {
 	pIGrid grid;
 
@@ -553,6 +553,77 @@ int main( )
 	}
 
 	auto sample_driven = FastEmpiricalDistribution( std::move( sample ), method );
+
+	return 0;
+}
+
+#include <LZ77HuffmanCompressor.h>
+
+using compressors::LZ77HuffmanCompressor;
+using compressors::HuffmanCompressor;
+
+class EmptyOutputStream : public IBinaryOutputStream
+{
+private: 
+	ull pos = 0;
+
+public:
+	ull get_current_position( ) const override { return pos; }
+	IBinaryOutputStream & operator<<( int ) override { return *this; }
+	IBinaryOutputStream & operator<<( unsigned int ) override { return *this; }
+	IBinaryOutputStream & operator<<( unsigned long long ) override { return *this; }
+	IBinaryOutputStream & operator<<( char ) override { return *this; }
+	IBinaryOutputStream & operator<<( byte ) override { return *this; }
+	IBinaryOutputStream & operator<<( double ) override { return *this; }
+	void write_bit( bool bit ) override { ++pos; }
+	void write_bytes( byte * bytes, unsigned int count ) override { }
+	void flush( ) override { }
+};
+
+int main/*_lz77*/( )
+{
+	auto reader = CsvReader( 1024, L';' );
+	auto grid = reader.read( L"lztest.csv", false, false );
+
+	Quantizations qs;
+	Quantization q = Quantization( 3 );
+
+#pragma region HARDCODE
+	q.borders = { 0.5, 1.5, 2.5 };
+	q.codes = { 1, 2 };
+	q.deviation = 0;
+	q.entropy = 1;
+	qs.push_back( q );
+	q.borders = { 1, 3, 5 };
+	q.codes = { 2, 4 };
+	qs.push_back( q );
+	q.borders = { -1, 1, 3 };
+	q.codes = { 0, 2 };
+	qs.push_back( q );
+	q.borders = { 0, 2, 4 };
+	q.codes = { 1, 3 };
+	qs.push_back( q );
+#pragma endregion
+
+	auto lz_compressor = LZ77HuffmanCompressor( 1024 );
+	auto h_compressor = HuffmanCompressor( );
+	auto lz_stream = EmptyOutputStream( );
+	auto h_stream = EmptyOutputStream( );
+
+	auto result = lz_compressor.compress( grid, qs, lz_stream );
+	result = h_compressor.compress( grid, qs, h_stream );
+
+	{
+		auto stream = FileOutputStream( L"output.out" );
+		lz_compressor.compress( grid, qs, stream );
+	}
+
+	pIGrid result_grid;
+
+	{
+		auto stream = FileInputStream( L"output.out" );
+		result_grid = lz_compressor.decompress( stream );
+	}
 
 	return 0;
 }

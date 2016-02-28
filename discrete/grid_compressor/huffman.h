@@ -404,11 +404,12 @@ namespace quantpressor
 				{
 					if ( &tree != this )
 					{
-						this->operator=( tree );
+						HuffmanTree::operator=( std::move( tree ) );
 						empty = tree.empty;
 						tree.empty = nullptr;
 						sublings = std::move( tree.sublings );
 					}
+					return *this;
 				}
 
 				DynamicHuffmanTree( Node *root, const T &empty_symbol ) : HuffmanTree( root )
@@ -419,6 +420,11 @@ namespace quantpressor
 					empty->priority = 0ULL;
 					sublings.push_back( root );
 					build_sublings( root );
+				}
+
+				DynamicHuffmanTree( ) : HuffmanTree( nullptr )
+				{
+
 				}
 
 				DynamicHuffmanTree( const std::map<T, ull> &start_frequences, T empty_symbol ) : HuffmanTree( nullptr )

@@ -120,6 +120,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Include\RoughGrid.cpp" />
+    <ClCompile Include="..\..\Include\RoughMetadata.cpp" />
     <ClCompile Include="CsvReader.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

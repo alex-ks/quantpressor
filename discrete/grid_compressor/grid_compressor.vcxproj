@@ -148,6 +148,7 @@
     <ClCompile Include="FileOutputStream.cpp" />
     <ClCompile Include="HuffmanCompressor.cpp" />
     <ClCompile Include="Quantizer.cpp" />
+    <ClCompile Include="TripletHandlers.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\distributions\distributions.vcxproj">
