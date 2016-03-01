@@ -8,22 +8,24 @@
 namespace distributions
 {
 	typedef std::function<double( double )> RealFunction;
-	typedef std::function<double( double, double )> DefinteIntegral;
+	typedef std::function<double( double, double )> DefiniteIntegral;
 
 	struct DetailedApproximationMethod
 	{
 		RealFunction kernel;
-		DefinteIntegral kernel_integral;
-		DefinteIntegral kernel_moment_1;
-		DefinteIntegral kernel_moment_2;
+		DefiniteIntegral kernel_integral;
+		DefiniteIntegral kernel_moment_1;
+		DefiniteIntegral kernel_moment_2;
 		double window;
+
+		static DetailedApproximationMethod gauss_kernel( double window );
 	};
 
 	class FastEmpiricalDistribution : public IDistribution
 	{
 	private:
 		RealFunction density_func;
-		DefinteIntegral density_integral, moment_1, moment_2;
+		DefiniteIntegral density_integral, moment_1, moment_2;
 		
 		std::vector<double> density_sample;
 		

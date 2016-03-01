@@ -5,6 +5,7 @@
 
 #include <IO.h>
 #include <vector>
+#include <map>
 
 namespace quantpressor
 {
@@ -15,6 +16,7 @@ namespace quantpressor
 		std::vector<double> columns_bps;
 		std::vector<double> real_variances;
 		std::vector<double> min_errors, avg_errors, max_errors;
+		std::map<std::wstring, std::wstring> extra_results;
 	};
 
 	class ICompressor

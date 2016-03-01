@@ -5,6 +5,7 @@
 #include <lib.h>
 #include <Quantizer.h>
 #include <HuffmanCompressor.h>
+#include <LZ77HuffmanCompressor.h>
 #include <NormalDistribution.h>
 #include <ExponentialDistribution.h>
 
@@ -75,7 +76,7 @@ void write_grid( string file_name, const pIGrid &grid )
 	}
 }
 
-#define QUANT_COUNT 100
+#define QUANT_COUNT 30
 #define ROW_COUNT 1e6
 #define EPS 1e-2
 
@@ -132,24 +133,7 @@ int main_distr_replicate( )
 
 	auto gauss_kernel = [k]( double r ) { return k * exp( -0.5 * r * r ); };
 
-	DetailedApproximationMethod method;
-	method.kernel = gauss_kernel;
-	method.kernel_integral = [_sq2]( double a, double b )
-	{
-		return 0.5 * ( std::erf( b * _sq2 ) - std::erf( a * _sq2 ) );
-	};
-	method.kernel_moment_1 = [k]( double a, double b )
-	{
-		return -k * ( exp( -0.5 * b * b ) - exp( -0.5 * a * a ) );
-	};
-
-	auto m2_func = [k, _sq2]( double x ) { return 0.5 * std::erf( x * _sq2 ) - k * x * exp( -0.5 * x * x ); };
-
-	method.kernel_moment_2 = [m2_func]( double a, double b )
-	{
-		return m2_func( b ) - m2_func( a );
-	};
-	method.window = 0.35;
+	auto method = DetailedApproximationMethod::gauss_kernel( 0.35 );
 
 	auto empirical = FastEmpiricalDistribution( grid, 0, method );
 
@@ -330,10 +314,12 @@ int main_archive_normal( )
 	return 0;
 }
 
-int main_archive_empirical( )
+int main/*_archive_empirical*/( )
 {
 	auto reader = CsvReader( 1024 * 1024, L';' );
 	auto grid = reader.read( L"real_data.csv", false, false );
+	wstring archive_name = L"real.qlz";
+	//wstring archive_name = L"real.out";
 
 	cout << "Grid loaded" << endl;
 
@@ -343,29 +329,13 @@ int main_archive_empirical( )
 	double quatize_time;
 	Quantizations qs;
 
-	double k = 1.0 / sqrt( 2 * _Pi );
-	const double _sq2 = 1.0 / sqrt( 2.0 );
-	auto gauss_kernel = [k]( double r ) { return k * exp( -0.5 * r * r ); };
-	DetailedApproximationMethod method;
-	method.kernel = gauss_kernel;
-	method.kernel_integral = [_sq2]( double a, double b )
-	{
-		return 0.5 * ( std::erf( b * _sq2 ) - std::erf( a * _sq2 ) );
-	};
-	method.kernel_moment_1 = [k]( double a, double b )
-	{
-		return -k * ( exp( -0.5 * b * b ) - exp( -0.5 * a * a ) );
-	};
-
-	auto m2_func = [k, _sq2]( double x ) { return 0.5 * std::erf( x * _sq2 ) - k * x * exp( -0.5 * x * x ); };
-
-	method.kernel_moment_2 = [m2_func]( double a, double b )
-	{
-		return m2_func( b ) - m2_func( a );
-	};
-	method.window = 0.35;
+	auto method = DetailedApproximationMethod::gauss_kernel( 0.35 );
 
 	timer.start( );
+
+	vector<double> 
+		left_borders( grid->get_column_count( ) ),
+		right_borders( grid->get_column_count( ) );
 
 	for ( int column = 0; column < grid->get_column_count( ); ++column )
 	{
@@ -378,6 +348,9 @@ int main_archive_empirical( )
 			left = left < value ? left : value;
 			right = right > value ? right : value;
 		}
+
+		left_borders[column] = left;
+		right_borders[column] = right;
 
 		left -= EPS;
 		right += EPS;
@@ -395,13 +368,12 @@ int main_archive_empirical( )
 	quatize_time = timer.stop( );
 	cout << "Quantization time: " << quatize_time << "s" << endl;
 
-	compressors::HuffmanCompressor compressor;
+	//compressors::HuffmanCompressor compressor;
+	compressors::LZ77HuffmanCompressor compressor( 1024 * 10 );
 
 	CompressionResult compression_params;
 
 	double compression_time, decompression_time;
-
-	wstring archive_name = L"compressed.out";
 
 	{
 		FileOutputStream stream( archive_name );
@@ -412,59 +384,42 @@ int main_archive_empirical( )
 
 	cout << "Compression time: " << compression_time << "s" << endl;
 
+	pIGrid decompressed;
+
 	{
 		FileInputStream stream( archive_name );
-
 		timer.start( );
-		auto decompressed = compressor.decompress( stream );
+		decompressed = compressor.decompress( stream );
 		decompression_time = timer.stop( );
-
-		cout << "Decompression time: " << decompression_time << "s" << endl;
-		cout << endl;
-
-		write_grid( "decompressed.csv", decompressed );
-		cout << "Decompressed written" << endl;
-
-#pragma region ERROR_COUNT
-
-		vector<double> left_borders( grid->get_column_count( ) ),
-			right_borders( grid->get_column_count( ) );
-
-		for ( auto &val : left_borders )
-			val = numeric_limits<double>::max( );
-
-		for ( auto &val : right_borders )
-			val = numeric_limits<double>::min( );
-
-		for ( int i = 0; i < grid->get_row_count( ); ++i )
-		{
-			for ( int j = 0; j < grid->get_column_count( ); ++j )
-			{
-				left_borders[j] = grid->get_value( i, j ) > left_borders[j] ? left_borders[j] : grid->get_value( i, j );
-				right_borders[j] = grid->get_value( i, j ) < right_borders[j] ? right_borders[j] : grid->get_value( i, j );
-			}
-		}
-
-		for ( int i = 0; i < grid->get_column_count( ); ++i )
-		{
-			cout << "Info for column " << i << ":" << endl << endl;
-
-			cout << "Interval: " << "[" << left_borders[i] << "; " << right_borders[i] << "]" << endl;
-			cout << "Expected entropy = " << qs[i].entropy << endl;
-			cout << "Average bit count per symbol = " << compression_params.columns_bps[i] << endl;
-			cout << "Expected mean square deviation = " << qs[i].deviation << endl;
-			cout << "Real mean square deviation = " << compression_params.real_variances[i] << endl;
-			cout << "Minimal deviation = " << compression_params.min_errors[i] << endl;
-			cout << "Maximal deviation = " << compression_params.max_errors[i] << endl;
-			cout << "Average deviation = " << compression_params.avg_errors[i] << endl;
-			cout << endl << endl;
-		}
-
-		system( "pause" );
-#pragma endregion ERROR_COUNT
-
 	}
 
+	cout << "Decompression time: " << decompression_time << "s" << endl;
+	cout << endl;
+
+	write_grid( "decompressed.csv", decompressed );
+	cout << "Decompressed written" << endl;
+
+	for ( int i = 0; i < grid->get_column_count( ); ++i )
+	{
+		cout << "Info for column " << i << ":" << endl << endl;
+
+		cout << "Interval: " << "[" << left_borders[i] << "; " << right_borders[i] << "]" << endl;
+		cout << "Expected entropy = " << qs[i].entropy << endl;
+		cout << "Average bit count per symbol = " << compression_params.columns_bps[i] << endl;
+		cout << "Expected mean square deviation = " << qs[i].deviation << endl;
+		cout << "Real mean square deviation = " << compression_params.real_variances[i] << endl;
+		cout << "Minimal deviation = " << compression_params.min_errors[i] << endl;
+		cout << "Maximal deviation = " << compression_params.max_errors[i] << endl;
+		cout << "Average deviation = " << compression_params.avg_errors[i] << endl;
+		cout << endl << endl;
+	}
+
+	for ( auto &pair : compression_params.extra_results )
+	{
+		wcout << pair.first << L" = " << pair.second << endl;
+	}
+
+	system( "pause" );
 
 	return 0;
 }
@@ -511,27 +466,7 @@ int main_fast_empirical( )
 		grid = reader.read( L"real_data.csv", false, false );
 	}
 
-	double k = 1.0 / sqrt( 2 * _Pi );
-	const double _sq2 = 1.0 / sqrt( 2.0 );
-	auto gauss_kernel = [k]( double r ) { return k * exp( -0.5 * r * r ); };
-	DetailedApproximationMethod method;
-	method.kernel = gauss_kernel;
-	method.kernel_integral = [_sq2]( double a, double b )
-	{
-		return 0.5 * ( std::erf( b * _sq2 ) - std::erf( a * _sq2 ) );
-	};
-	method.kernel_moment_1 = [k]( double a, double b )
-	{
-		return -k * ( exp( -0.5 * b * b ) - exp( -0.5 * a * a ) );
-	};
-
-	auto m2_func = [k, _sq2]( double x ) { return 0.5 * std::erf( x * _sq2 ) - k * x * exp( -0.5 * x * x ); };
-
-	method.kernel_moment_2 = [m2_func]( double a, double b )
-	{
-		return m2_func( b ) - m2_func( a );
-	};
-	method.window = 0.35;
+	auto method = DetailedApproximationMethod::gauss_kernel( 0.35 );
 
 	auto grid_driven = FastEmpiricalDistribution( grid, 0, method );
 
@@ -557,8 +492,6 @@ int main_fast_empirical( )
 	return 0;
 }
 
-#include <LZ77HuffmanCompressor.h>
-
 using compressors::LZ77HuffmanCompressor;
 using compressors::HuffmanCompressor;
 
@@ -580,7 +513,7 @@ public:
 	void flush( ) override { }
 };
 
-int main/*_lz77*/( )
+int main_lz77( )
 {
 	auto reader = CsvReader( 1024, L';' );
 	auto grid = reader.read( L"lztest.csv", false, false );

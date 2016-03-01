@@ -88,17 +88,25 @@ namespace quantpressor
 
 			auto writer = TripletWriter( stream, width );
 
-			for ( index_t i = 0; i < symbol_count; ++i )
+			width_t max_len = -1;
+			double avg_len = 0;
+			index_t triplet_count = 0;
+
+			index_t i;
+			for ( i = 0; i < symbol_count; ++i )
 			{
 				width_t dist = 0, length = 0;
-				size_t curr_column = i % column_count;
-				index_t start = window_start + ( curr_column + column_count - window_start % column_count ) % column_count;
+				index_t start = window_start + ( i % column_count + column_count - window_start % column_count ) % column_count;
 
 				for ( index_t j = start; j < i; j += column_count )
 				{
 					width_t curr_length = 0;
-					while ( find_code_index( grid->get_value( ( i + curr_length ) / column_count, ( i + curr_length ) % column_count ), quantizations[( i + curr_length ) % column_count] )
-							== find_code_index( grid->get_value( ( j + curr_length ) / column_count, ( j + curr_length ) % column_count ), quantizations[( j + curr_length ) % column_count] )
+					while ( find_code_index( grid->get_value( ( i + curr_length ) / column_count, 
+															  ( i + curr_length ) % column_count ), 
+											 quantizations[( i + curr_length ) % column_count] )
+							== find_code_index( grid->get_value( ( j + curr_length ) / column_count, 
+																 ( j + curr_length ) % column_count ), 
+												quantizations[( j + curr_length ) % column_count] )
 							&& i + curr_length < symbol_count
 							&& j + curr_length < i )
 					{
@@ -112,17 +120,27 @@ namespace quantpressor
 					}
 				}
 
-				auto &code = symbol_trees[( i + length ) % column_count].get_encoding( find_code( grid->get_value( ( i + length ) / column_count, ( i + length ) % column_count ), quantizations[( i + length ) % column_count] ) );
-				writer.write_triplet( dist, length, code );
+				auto &code = symbol_trees[( i + length ) % column_count].get_encoding( find_code( grid->get_value( ( i + length ) / column_count, ( i + length ) % column_count ), 
+																								  quantizations[( i + length ) % column_count] ) );
+				writer.write_triplet( dist, length, code );	
 
 				i += length;
+
+				max_len = max_len > length ? max_len : length;
+				avg_len = triplet_count != 0 ? ( avg_len * triplet_count + length ) / ( triplet_count + 1 ) : length;
+				++triplet_count;
 
 				if ( i - window_start > width )
 				{
 					window_start += i - window_start - width;
 				}
+			}
 
-				curr_column = ++curr_column % column_count;
+			if ( i == symbol_count )
+			{
+				auto &code = symbol_trees[i % column_count].get_encoding( find_code( grid->get_value( i / column_count, i % column_count ), 
+																					 quantizations[i % column_count] ) );
+				writer.write_triplet( 0, 0, code );
 			}
 
 			writer.flush( );
@@ -131,6 +149,9 @@ namespace quantpressor
 
 			for ( int i = 0; i < column_count; ++i )
 				result.columns_bps.push_back( bps );
+
+			result.extra_results[L"Maximal sequence length"] = std::to_wstring( max_len );
+			result.extra_results[L"Average sequence length"] = std::to_wstring( avg_len );
 
 			return result;
 		}
