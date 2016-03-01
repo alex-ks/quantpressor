@@ -17,6 +17,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Quantpressor", "Quantpresso
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quantpressor.UI", "Quantpressor.UI\Quantpressor.UI.csproj", "{AFADA2DD-270E-4A17-8C43-0C45552C1322}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "column_sort", "column_sort\column_sort.vcxproj", "{4A499D1F-8CC2-4318-9154-596F7C677493}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -105,6 +107,16 @@ Global
 		{AFADA2DD-270E-4A17-8C43-0C45552C1322}.Release|x64.Build.0 = Release|Any CPU
 		{AFADA2DD-270E-4A17-8C43-0C45552C1322}.Release|x86.ActiveCfg = Release|x86
 		{AFADA2DD-270E-4A17-8C43-0C45552C1322}.Release|x86.Build.0 = Release|x86
+		{4A499D1F-8CC2-4318-9154-596F7C677493}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{4A499D1F-8CC2-4318-9154-596F7C677493}.Debug|x64.ActiveCfg = Debug|x64
+		{4A499D1F-8CC2-4318-9154-596F7C677493}.Debug|x64.Build.0 = Debug|x64
+		{4A499D1F-8CC2-4318-9154-596F7C677493}.Debug|x86.ActiveCfg = Debug|Win32
+		{4A499D1F-8CC2-4318-9154-596F7C677493}.Debug|x86.Build.0 = Debug|Win32
+		{4A499D1F-8CC2-4318-9154-596F7C677493}.Release|Any CPU.ActiveCfg = Release|Win32
+		{4A499D1F-8CC2-4318-9154-596F7C677493}.Release|x64.ActiveCfg = Release|x64
+		{4A499D1F-8CC2-4318-9154-596F7C677493}.Release|x64.Build.0 = Release|x64
+		{4A499D1F-8CC2-4318-9154-596F7C677493}.Release|x86.ActiveCfg = Release|Win32
+		{4A499D1F-8CC2-4318-9154-596F7C677493}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

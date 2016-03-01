@@ -195,6 +195,7 @@ namespace quantpressor
 				{
 					if ( &tree != this )
 					{
+						delete root;
 						root = tree.root;
 						curr = tree.curr;
 						tree.curr = nullptr;

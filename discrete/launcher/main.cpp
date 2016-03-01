@@ -9,6 +9,8 @@
 #include <NormalDistribution.h>
 #include <ExponentialDistribution.h>
 
+#include <ColumnSorter.h>
+
 #include <FileInputStream.h>
 #include <FileOutputStream.h>
 
