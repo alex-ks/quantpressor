@@ -6,19 +6,21 @@ namespace quantpressor
 	{
 		using std::map;
 		using std::vector;
+		using std::ceil;
+		using std::log2;
 		using huffman::DynamicHuffmanTree;
 
 		TripletWriter::TripletWriter( IBinaryOutputStream & stream, width_t w ) : 
 			out( stream ), 
-			width( w )
+			width( w ),
+			letter_number( 1 )
 		{
-			dist_tree = length_tree = nullptr;
+			length_tree = nullptr;
 		}
 
 		TripletWriter::~TripletWriter( )
 		{
 			flush( );
-			delete dist_tree;
 			delete length_tree;
 		}
 
@@ -49,9 +51,20 @@ namespace quantpressor
 			}
 		}
 
+		bit_set TripletWriter::encode_dist( width_t distance )
+		{
+			bit_set code;
+			int bit_count = ceil( log2( letter_number ) );
+			for ( int i = bit_count - 1; i >= 0; --i )
+			{
+				code.push_back( ( 1 << i ) & distance );
+			}
+			return std::move( code );
+		}
+
 		void TripletWriter::write_triplet( width_t distance, width_t length, const bit_set & code )
 		{
-			if ( dist_tree == nullptr )
+			if ( length_tree == nullptr )
 			{
 				dist_cache.push_back( distance );
 				length_cache.push_back( length );
@@ -67,33 +80,34 @@ namespace quantpressor
 			}
 			else
 			{
-				dist_tree->add_new_symbol( distance );
+				auto dist_code = encode_dist( distance );
 				length_tree->add_new_symbol( length );
 
-				write_code( dist_tree->get_encoding( distance ), out );
+				write_code( dist_code, out );
 				write_code( length_tree->get_encoding( length ), out );
 				write_code( code, out );
+
+				letter_number += length + 1;
 			}
 		}
 
 		void TripletWriter::flush( )
 		{
-			if ( dist_tree == nullptr )
+			if ( length_tree == nullptr )
 			{
-				auto dist_freq = calc_frequences( dist_cache );
 				auto length_freq = calc_frequences( length_cache );
 
-				dist_tree = new DynamicHuffmanTree<width_t>( dist_freq, WIDTH_T_EMPTY );
 				length_tree = new DynamicHuffmanTree<width_t>( length_freq, WIDTH_T_EMPTY );
 
-				dist_tree->serialize( out );
 				length_tree->serialize( out );
 
 				for ( int i = 0; i < dist_cache.size( ); ++i )
 				{
-					write_code( dist_tree->get_encoding( dist_cache[i] ), out );
+					auto dist_code = encode_dist( dist_cache[i] );
+					write_code( dist_code, out );
 					write_code( length_tree->get_encoding( length_cache[i] ), out );
 					write_code( symbol_cache[i], out );
+					letter_number += length_cache[i] + 1;
 				}
 			}
 		}
@@ -103,9 +117,9 @@ namespace quantpressor
 		TripletReader::TripletReader( IBinaryInputStream &stream, width_t w, vector<huffman::HuffmanTree<double>> &&trees ) :
 			in( stream ),
 			symbol_trees( std::move( trees ) ),
-			width( w )
+			width( w ),
+			letter_number( 1 )
 		{
-			dist_tree = DynamicHuffmanTree<width_t>::deserialize( stream, WIDTH_T_EMPTY );
 			length_tree = DynamicHuffmanTree<width_t>::deserialize( stream, WIDTH_T_EMPTY );
 		}
 
@@ -133,7 +147,16 @@ namespace quantpressor
 
 		void TripletReader::read_triplet( width_t *distance, width_t *length, double *value )
 		{
-			auto dist = read_compressed_value( dist_tree, in );
+			int bit_count = ceil( log2( letter_number ) );
+			width_t dist = 0;
+
+			for ( int i = 0; i < bit_count; ++i )
+			{
+				auto bit = in.read_bit( );
+				dist <<= 1;
+				dist += bit ? 1 : 0;
+			}
+
 			auto len = read_compressed_value( length_tree, in );
 
 			curr_column = ( curr_column + len ) % symbol_trees.size( );
@@ -142,24 +165,18 @@ namespace quantpressor
 
 			if ( curr_width < width )
 			{
-				update_frequence( dist_freq, dist );
 				update_frequence( length_freq, len );
 				
 				if ( ++curr_width == width )
 				{
-					dist_tree.assume_frequences( dist_freq );
 					length_tree.assume_frequences( length_freq );
 				}
 			}
 			else
 			{
-				if ( dist == WIDTH_T_EMPTY )
-				{ in >> dist; }
-
 				if ( len == WIDTH_T_EMPTY )
 				{ in >> len; }
-
-				dist_tree.add_new_symbol( dist );
+				
 				length_tree.add_new_symbol( len );
 			}
 
@@ -167,6 +184,7 @@ namespace quantpressor
 			*length = len;
 			*value = symbol;
 
+			letter_number += len + 1;
 			curr_column = ++curr_column % symbol_trees.size( );
 		}
 	}

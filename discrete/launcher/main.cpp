@@ -26,7 +26,7 @@ using namespace quantpressor::io;
 int distrib_test( )
 {
 	NormalDistribution d( 2, 3 );
-	
+
 	Quantizer quantizer( 2, 10 );
 	Quantization q = quantizer.quantize( 10, 0.01, d );
 
@@ -152,7 +152,7 @@ int main_distr_replicate( )
 int main_read( )
 {
 	int buf_size = 0;
-	
+
 	cin >> buf_size;
 
 	while ( buf_size != -1 )
@@ -225,7 +225,7 @@ int main_archive_normal( )
 	cout << "Compression time: " << compression_time << "s" << endl;
 
 	write_grid( "grid.csv", grid );
-	
+
 	{
 		FileInputStream stream( L"output.txt" );
 
@@ -271,7 +271,7 @@ int main_archive_normal( )
 
 				max_error[j] = max_error[j] > error ? max_error[j] : error;
 				min_error[j] = min_error[j] < error ? min_error[j] : error;
-				
+
 				if ( i > 0 )
 				{
 					avg_error[j] = ( avg_error[j] * i + error ) / ( i + 1 );
@@ -316,12 +316,38 @@ int main_archive_normal( )
 	return 0;
 }
 
-int main/*_archive_empirical*/( )
+void print_result( const CompressionResult &result, const Quantizations &qs, const vector<double> &left_borders, const vector<double> right_borders )
+{
+	for ( int i = 0; i < left_borders.size( ); ++i )
+	{
+		cout << "Info for column " << i << ":" << endl << endl;
+
+		cout << "Interval: " << "[" << left_borders[i] << "; " << right_borders[i] << "]" << endl;
+		cout << "Expected entropy = " << qs[i].entropy << endl;
+		cout << "Average bit count per symbol = " << result.columns_bps[i] << endl;
+		cout << "Expected mean square deviation = " << qs[i].deviation << endl;
+		cout << "Real mean square deviation = " << result.real_variances[i] << endl;
+		cout << "Minimal deviation = " << result.min_errors[i] << endl;
+		cout << "Maximal deviation = " << result.max_errors[i] << endl;
+		cout << "Average deviation = " << result.avg_errors[i] << endl;
+		cout << endl << endl;
+	}
+
+	for ( auto &pair : result.extra_results )
+	{
+		wcout << pair.first << L" = " << pair.second << endl;
+	}
+}
+
+int main_archive_empirical( )
 {
 	auto reader = CsvReader( 1024 * 1024, L';' );
 	auto grid = reader.read( L"real_data.csv", false, false );
 	wstring archive_name = L"real.qlz";
 	//wstring archive_name = L"real.out";
+
+	//auto sorter = column_sort::ColumnSorter( );
+	//grid = sorter.sort_columns( grid );
 
 	cout << "Grid loaded" << endl;
 
@@ -335,7 +361,7 @@ int main/*_archive_empirical*/( )
 
 	timer.start( );
 
-	vector<double> 
+	vector<double>
 		left_borders( grid->get_column_count( ) ),
 		right_borders( grid->get_column_count( ) );
 
@@ -401,25 +427,7 @@ int main/*_archive_empirical*/( )
 	write_grid( "decompressed.csv", decompressed );
 	cout << "Decompressed written" << endl;
 
-	for ( int i = 0; i < grid->get_column_count( ); ++i )
-	{
-		cout << "Info for column " << i << ":" << endl << endl;
-
-		cout << "Interval: " << "[" << left_borders[i] << "; " << right_borders[i] << "]" << endl;
-		cout << "Expected entropy = " << qs[i].entropy << endl;
-		cout << "Average bit count per symbol = " << compression_params.columns_bps[i] << endl;
-		cout << "Expected mean square deviation = " << qs[i].deviation << endl;
-		cout << "Real mean square deviation = " << compression_params.real_variances[i] << endl;
-		cout << "Minimal deviation = " << compression_params.min_errors[i] << endl;
-		cout << "Maximal deviation = " << compression_params.max_errors[i] << endl;
-		cout << "Average deviation = " << compression_params.avg_errors[i] << endl;
-		cout << endl << endl;
-	}
-
-	for ( auto &pair : compression_params.extra_results )
-	{
-		wcout << pair.first << L" = " << pair.second << endl;
-	}
+	print_result( compression_params, qs, left_borders, right_borders );
 
 	system( "pause" );
 
@@ -499,19 +507,19 @@ using compressors::HuffmanCompressor;
 
 class EmptyOutputStream : public IBinaryOutputStream
 {
-private: 
+private:
 	ull pos = 0;
 
 public:
 	ull get_current_position( ) const override { return pos; }
-	IBinaryOutputStream & operator<<( int ) override { return *this; }
-	IBinaryOutputStream & operator<<( unsigned int ) override { return *this; }
-	IBinaryOutputStream & operator<<( unsigned long long ) override { return *this; }
-	IBinaryOutputStream & operator<<( char ) override { return *this; }
-	IBinaryOutputStream & operator<<( byte ) override { return *this; }
-	IBinaryOutputStream & operator<<( double ) override { return *this; }
+	IBinaryOutputStream & operator<<( int ) override { pos += 8 * sizeof( int ); return *this; }
+	IBinaryOutputStream & operator<<( unsigned int ) override { pos += 8 * sizeof( unsigned int ); return *this; }
+	IBinaryOutputStream & operator<<( unsigned long long ) override { pos += 8 * sizeof( unsigned long long ); return *this; }
+	IBinaryOutputStream & operator<<( char ) override { pos += 8 * sizeof( char ); return *this; }
+	IBinaryOutputStream & operator<<( byte ) override { pos += 8 * sizeof( byte ); return *this; }
+	IBinaryOutputStream & operator<<( double ) override { pos += 8 * sizeof( double ); return *this; }
 	void write_bit( bool bit ) override { ++pos; }
-	void write_bytes( byte * bytes, unsigned int count ) override { }
+	void write_bytes( byte * bytes, unsigned int count ) override { pos += 8 * sizeof( byte ) * count; }
 	void flush( ) override { }
 };
 
@@ -559,6 +567,80 @@ int main_lz77( )
 		auto stream = FileInputStream( L"output.out" );
 		result_grid = lz_compressor.decompress( stream );
 	}
+
+	return 0;
+}
+
+int main/*_compress_check*/( )
+{
+	auto reader = CsvReader( 1024 * 1024, L';' );
+	auto grid = reader.read( L"real_data.csv", false, false );
+	wstring archive_name = L"real.qlz";
+	//wstring archive_name = L"real.out";
+
+	auto sorter = column_sort::ColumnSorter( );
+	grid = sorter.sort_columns( grid );
+
+	cout << "Grid loaded" << endl;
+
+	vector<pIDistribution> distrs;
+
+	Timer timer;
+	double quatize_time;
+	Quantizations qs;
+
+	auto method = DetailedApproximationMethod::gauss_kernel( 0.35 );
+
+	timer.start( );
+
+	vector<double>
+		left_borders( grid->get_column_count( ) ),
+		right_borders( grid->get_column_count( ) );
+
+	for ( int column = 0; column < grid->get_column_count( ); ++column )
+	{
+		double left = numeric_limits<double>::max( );
+		double right = numeric_limits<double>::min( );
+
+		for ( int row = 0; row < grid->get_row_count( ); ++row )
+		{
+			auto value = grid->get_value( row, column );
+			left = left < value ? left : value;
+			right = right > value ? right : value;
+		}
+
+		left_borders[column] = left;
+		right_borders[column] = right;
+
+		left -= EPS;
+		right += EPS;
+
+		pIDistribution empirical = make_heap_aware<FastEmpiricalDistribution>( grid, column, method );
+
+		distrs.push_back( empirical );
+
+		Quantizer quantizer( left, right );
+		qs.push_back( quantizer.quantize( QUANT_COUNT, EPS, *empirical ) );
+
+		cout << "Column " << column << " quantized" << endl;
+	}
+
+	quatize_time = timer.stop( );
+	cout << "Quantization time: " << quatize_time << "s" << endl;
+
+	//compressors::HuffmanCompressor compressor;
+	compressors::LZ77HuffmanCompressor compressor( 1024 * 10 );
+
+	CompressionResult compression_params;
+
+	double compression_time, decompression_time;
+
+	EmptyOutputStream stream;
+	compression_params = compressor.compress( grid, qs, stream );
+
+	print_result( compression_params, qs, left_borders, right_borders );
+
+	system( "pause" );
 
 	return 0;
 }

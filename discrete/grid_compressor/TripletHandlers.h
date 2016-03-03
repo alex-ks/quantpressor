@@ -21,7 +21,9 @@ namespace quantpressor
 			std::vector<width_t> dist_cache, length_cache;
 			std::vector<bit_set> symbol_cache;
 			width_t width;
-			huffman::DynamicHuffmanTree<width_t> *dist_tree, *length_tree;
+			index_t letter_number;
+			huffman::DynamicHuffmanTree<width_t> *length_tree;
+			bit_set encode_dist( width_t distance );
 
 		public:
 			TripletWriter( IBinaryOutputStream &stream, width_t width );
@@ -36,10 +38,11 @@ namespace quantpressor
 		private:
 			IBinaryInputStream &in;
 			std::vector<huffman::HuffmanTree<double>> symbol_trees;
-			std::map<width_t, ull> dist_freq, length_freq;
+			std::map<width_t, ull> length_freq;
 			unsigned int curr_column = 0;
 			width_t width, curr_width = 0;
-			huffman::DynamicHuffmanTree<width_t> dist_tree, length_tree;
+			index_t letter_number;
+			huffman::DynamicHuffmanTree<width_t> length_tree;
 
 		public:
 			TripletReader( IBinaryInputStream &stream, width_t width, std::vector<huffman::HuffmanTree<double>> &&trees );
