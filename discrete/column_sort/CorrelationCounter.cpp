@@ -36,7 +36,9 @@ namespace quantpressor
 				DX2 += second_shift * second_shift;
 			}
 
-			correlation /= std::sqrt( DX1 * DX2 );
+			auto square = std::sqrt( DX1 * DX2 );	
+			correlation = square != 0 ? correlation / square : 0;
+
 			return correlation;
 		}
 

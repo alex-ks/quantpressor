@@ -36,7 +36,9 @@ namespace quantpressor
 
 			while ( links.size( ) > 1 )
 			{
-				set<list<uint>>::iterator first, second;
+				set<list<uint>>::iterator
+					first = links.begin( ),
+					second = ++links.begin( );
 				double max = 0.0;
 
 				for ( auto i = links.begin( ); i != links.end( ); ++i )

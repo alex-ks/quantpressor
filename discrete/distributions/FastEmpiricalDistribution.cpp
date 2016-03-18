@@ -202,7 +202,8 @@ namespace distributions
 
 	double FastEmpiricalDistribution::expectation( double a, double b ) const
 	{
-		return moment_1( a, b ) / density_integral( a, b );
+		auto ex = moment_1( a, b ) / density_integral( a, b );
+		return std::isfinite( ex ) ? ex : ( a + b ) / 2;
 	}
 
 	double FastEmpiricalDistribution::deviation( ) const
