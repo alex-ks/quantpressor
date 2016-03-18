@@ -604,7 +604,7 @@ Quantizations quantize_grid( const pIGrid &grid,
 		distrs->push_back( empirical );
 
 		Quantizer quantizer( left, right );
-		qs.push_back( quantizer.quantize( QUANT_COUNT, EPS, *empirical ) );
+		qs.push_back( quantizer.quantize( EPS, *empirical ) );
 
 		cout << "Column " << column << " quantized" << endl;
 	}
@@ -615,7 +615,7 @@ Quantizations quantize_grid( const pIGrid &grid,
 int main/*_compress_check*/( )
 {
 	auto reader = CsvReader( 1024 * 1024, L';' );
-	auto grid = reader.read( L"test_data_small.csv", false, false );
+	auto grid = reader.read( L"real_data.csv", false, false );
 
 	FILE *old_stdout;
 	_wfreopen_s( &old_stdout, L"output.txt", L"w", stdout );
