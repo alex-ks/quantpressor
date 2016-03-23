@@ -121,6 +121,7 @@
     <ClCompile Include="EmpiricalDistribution.cpp" />
     <ClCompile Include="ExponentialDistribution.cpp" />
     <ClCompile Include="FastEmpiricalDistribution.cpp" />
+    <ClCompile Include="SampleExtractor.cpp" />
     <ClCompile Include="TrapezoidalIntegrator.cpp" />
     <ClCompile Include="NormalDistribution.cpp" />
   </ItemGroup>
@@ -128,6 +129,7 @@
     <ClInclude Include="EmpiricalDistribution.h" />
     <ClInclude Include="ExponentialDistribution.h" />
     <ClInclude Include="FastEmpiricalDistribution.h" />
+    <ClInclude Include="SampleExtractor.h" />
     <ClInclude Include="TrapezoidalIntegrator.h" />
     <ClInclude Include="IDistribution.h" />
     <ClInclude Include="IIntegrator.h" />

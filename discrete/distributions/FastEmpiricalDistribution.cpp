@@ -3,6 +3,7 @@
 #include <exception.h>
 #include <random>
 #include <cmath>
+#include <unordered_map>
 
 namespace distributions
 {
@@ -254,5 +255,35 @@ namespace distributions
 		method.window = window;
 
 		return std::move( method );
+	}
+
+	static const double factor = std::pow( 4 * std::_Pi, -0.1 ) * std::pow( 3.0 / 8.0, -0.2 ) * std::pow( std::_Pi, 0.1 );
+
+	DetailedApproximationMethod DetailedApproximationMethod::gauss_kernel( const std::vector<double>& sample )
+	{
+		double mean = 0.0, 
+			max = std::numeric_limits<double>::min( ),
+			min = std::numeric_limits<double>::max( );
+
+		for ( auto value : sample )
+		{
+			mean += value;
+			max = value < max ? max : value;
+			min = value > min ? min : value;
+		}
+		mean /= sample.size( );
+
+		double deviation = 0.0;
+		
+		for ( auto value : sample )
+		{
+			deviation += ( value - mean ) * ( value - mean );
+		}
+		deviation /= sample.size( ) - 1;
+
+		double h = factor * std::sqrt( deviation ) * std::pow( sample.size( ), -0.2 );
+
+		// temporary stub for better quantization convergence
+		return gauss_kernel( h < 10 ? h : 0.35 );
 	}
 }

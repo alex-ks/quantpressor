@@ -45,6 +45,9 @@
     <ClCompile Include="FastEmpiricalDistribution.cpp">
       <Filter>Source Files\Distributions</Filter>
     </ClCompile>
+    <ClCompile Include="SampleExtractor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IDistribution.h">
@@ -67,6 +70,9 @@
     </ClInclude>
     <ClInclude Include="FastEmpiricalDistribution.h">
       <Filter>Header Files\Distributions</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleExtractor.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -9,6 +9,8 @@
 #include <NormalDistribution.h>
 #include <ExponentialDistribution.h>
 
+#include <SampleExtractor.h>
+
 #include <ColumnSorter.h>
 
 #include <FileInputStream.h>
@@ -574,12 +576,13 @@ int main_lz77( )
 }
 
 Quantizations quantize_grid( const pIGrid &grid,
-							 const DetailedApproximationMethod &method,
 							 vector<double> *left_borders,
 							 vector<double> *right_borders,
 							 vector<pIDistribution> *distrs )
 {
 	Quantizations qs;
+
+	auto extractor = SampleExtractor( );
 
 	for ( int column = 0; column < grid->get_column_count( ); ++column )
 	{
@@ -599,7 +602,10 @@ Quantizations quantize_grid( const pIGrid &grid,
 		left -= EPS;
 		right += EPS;
 
-		pIDistribution empirical = make_heap_aware<FastEmpiricalDistribution>( grid, column, method );
+		auto sample = extractor.extract_sample( column, grid );
+		auto method = DetailedApproximationMethod::gauss_kernel( sample );
+
+		pIDistribution empirical = make_heap_aware<FastEmpiricalDistribution>( std::move( sample ), method );
 
 		distrs->push_back( empirical );
 
@@ -615,20 +621,18 @@ Quantizations quantize_grid( const pIGrid &grid,
 int main/*_compress_check*/( )
 {
 	auto reader = CsvReader( 1024 * 1024, L';' );
-	auto grid = reader.read( L"real_data.csv", false, false );
+	auto grid = reader.read( L"test_data_small.csv", false, false );
 
-	FILE *old_stdout;
-	_wfreopen_s( &old_stdout, L"output.txt", L"w", stdout );
+	//FILE *old_stdout;
+	//_wfreopen_s( &old_stdout, L"output.txt", L"w", stdout );
 
-	auto sorter = column_sort::ColumnSorter( );
-	auto sorted_grid = sorter.sort_columns( grid );
+	//auto sorter = column_sort::ColumnSorter( );
+	//auto sorted_grid = sorter.sort_columns( grid );
 
 	cout << "Grid loaded" << endl;
 
 	Timer timer;
 	double quatize_time;
-
-	auto method = DetailedApproximationMethod::gauss_kernel( 0.35 );
 
 	timer.start( );
 
@@ -638,7 +642,7 @@ int main/*_compress_check*/( )
 		left_borders( grid->get_column_count( ) ),
 		right_borders( grid->get_column_count( ) );
 
-	auto qs = quantize_grid( grid, method, &left_borders, &right_borders, &distrs );
+	auto qs = quantize_grid( grid, &left_borders, &right_borders, &distrs );
 
 	vector<pIDistribution> sorted_distrs;
 
@@ -646,7 +650,7 @@ int main/*_compress_check*/( )
 		sorted_left_borders( grid->get_column_count( ) ),
 		sorted_right_borders( grid->get_column_count( ) );
 
-	auto sorted_qs = quantize_grid( sorted_grid, method, &sorted_left_borders, &sorted_right_borders, &sorted_distrs );
+	//auto sorted_qs = quantize_grid( sorted_grid, method, &sorted_left_borders, &sorted_right_borders, &sorted_distrs );
 
 	quatize_time = timer.stop( );
 	cout << "Quantization time: " << quatize_time << "s" << endl;
@@ -656,23 +660,23 @@ int main/*_compress_check*/( )
 
 	EmptyOutputStream stream;
 
-	auto result = h_compressor.compress( grid, qs, stream );
+	/*auto result = h_compressor.compress( grid, qs, stream );
 	cout << "Huffman:" << endl << endl;
 	print_result( result, qs, left_borders, right_borders );
 	cout << "Size = " << stream.get_current_position( ) / 8.0 / 1024.0 << "KB" << endl << endl;
-	stream.clear( );
+	stream.clear( );*/
 
-	result = lz_compressor.compress( grid, qs, stream );
+	auto result = lz_compressor.compress( grid, qs, stream );
 	cout << "LZ77:" << endl << endl;
 	print_result( result, qs, left_borders, right_borders );
 	cout << "Size = " << stream.get_current_position( ) / 8.0 / 1024.0 << "KB" << endl << endl;
 	stream.clear( );
 
-	result = lz_compressor.compress( sorted_grid, sorted_qs, stream );
+	/*result = lz_compressor.compress( sorted_grid, sorted_qs, stream );
 	cout << "LZ77:" << endl << endl;
 	print_result( result, sorted_qs, sorted_left_borders, sorted_right_borders );
 	cout << "Size = " << stream.get_current_position( ) / 8.0 / 1024.0 << "KB" << endl << endl;
-	stream.clear( );
+	stream.clear( );*/
 
 	system( "pause" );
 

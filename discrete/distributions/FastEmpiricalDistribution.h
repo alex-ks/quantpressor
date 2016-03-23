@@ -19,6 +19,7 @@ namespace distributions
 		double window;
 
 		static DetailedApproximationMethod gauss_kernel( double window );
+		static DetailedApproximationMethod gauss_kernel( const std::vector<double> &sample );
 	};
 
 	class FastEmpiricalDistribution : public IDistribution

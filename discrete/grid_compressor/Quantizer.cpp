@@ -2,6 +2,7 @@
 #include <random>
 #include <utility>
 #include <cmath>
+#include <atomic>
 
 const int quantpressor::Quantizer::START_N = 100;
 const int quantpressor::Quantizer::SEARCH_ITER_COUNT = 10;
@@ -76,14 +77,17 @@ quantpressor::Quantization quantpressor::Quantizer::quantize( int quant_count,
 			auto c = distribution.expectation( q.borders[i], q.borders[i + 1] );
 
 			if ( std::abs( q.codes[i] - c ) < 1e-7 )
-				invariant_count++;
+			{
+#pragma omp atomic
+				++invariant_count;
+			}
 
 			q.codes[i] = c;
 		}
 
 		eps = 0.0;
 
-#pragma omp parallel for reduction( + : eps )
+//#pragma omp parallel for reduction( + : eps )
 		for ( int i = 0; i < quant_count - 1; ++i )
 			eps += distribution.deviation( q.borders[i], q.borders[i + 1] );
 		++count;
@@ -98,7 +102,7 @@ quantpressor::Quantization quantpressor::Quantizer::quantize( int quant_count,
 	for ( int i = 1; i < quant_count; ++i )
 	{
 		double p = distribution( q.borders[i] ) - distribution( q.borders[i - 1] );
-		entropy -= p * std::log2( p );
+		entropy -= p != 0.0 ? p * std::log2( p ) : 0.0;
 	}
 
 	q.entropy = entropy;
@@ -111,7 +115,7 @@ quantpressor::Quantization quantpressor::Quantizer::quantize( double max_error,
 {
 	Quantization q;
 	auto n = START_N;
-	int left = 0;
+	int left = 2; //quantization must have at least one range with two borders
 
 	q = quantize( START_N, SEARCH_ITER_COUNT, max_error, distribution );
 
