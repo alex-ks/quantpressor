@@ -3,24 +3,26 @@
 #include <lib.h>
 #include <vector>
 
+#include "IInitialValuesConstructor.h"
+
 namespace quantpressor
 {
-	struct Quantization
+	class UniformConstructor : public IInitialValuesConstructor
 	{
-		std::vector<double> borders, codes;
-		double deviation;
-		double entropy;
+	private:
+		double L, R;
 
-		Quantization( int quant_count );
-		Quantization( );
+	public:
+		Quantization construct_initial_values( int quant_count ) const override;
 
-		int get_quant_count( ) const;
+		UniformConstructor( double left, double right );
+		~UniformConstructor( ) override;
 	};
 
 	class Quantizer
 	{
 	private:
-		double L, R;
+		IInitialValuesConstructor *constructor;
 
 		static const int START_N;
 		static const int SEARCH_ITER_COUNT;
@@ -28,6 +30,8 @@ namespace quantpressor
 
 	public:
 		Quantizer( double left, double right );
+		Quantizer( IInitialValuesConstructor *constructor );
+		~Quantizer( );
 
 		Quantization quantize( int quant_count, 
 							   double max_error, 
