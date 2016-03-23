@@ -621,7 +621,7 @@ Quantizations quantize_grid( const pIGrid &grid,
 int main/*_compress_check*/( )
 {
 	auto reader = CsvReader( 1024 * 1024, L';' );
-	auto grid = reader.read( L"test_data_small.csv", false, false );
+	auto grid = reader.read( L"real_data.csv", false, false );
 
 	//FILE *old_stdout;
 	//_wfreopen_s( &old_stdout, L"output.txt", L"w", stdout );
@@ -660,17 +660,17 @@ int main/*_compress_check*/( )
 
 	EmptyOutputStream stream;
 
-	/*auto result = h_compressor.compress( grid, qs, stream );
+	auto result = h_compressor.compress( grid, qs, stream );
 	cout << "Huffman:" << endl << endl;
 	print_result( result, qs, left_borders, right_borders );
 	cout << "Size = " << stream.get_current_position( ) / 8.0 / 1024.0 << "KB" << endl << endl;
-	stream.clear( );*/
+	stream.clear( );
 
-	auto result = lz_compressor.compress( grid, qs, stream );
+	/*auto result = lz_compressor.compress( grid, qs, stream );
 	cout << "LZ77:" << endl << endl;
 	print_result( result, qs, left_borders, right_borders );
 	cout << "Size = " << stream.get_current_position( ) / 8.0 / 1024.0 << "KB" << endl << endl;
-	stream.clear( );
+	stream.clear( );*/
 
 	/*result = lz_compressor.compress( sorted_grid, sorted_qs, stream );
 	cout << "LZ77:" << endl << endl;

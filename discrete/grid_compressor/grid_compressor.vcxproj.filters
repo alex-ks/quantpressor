@@ -66,6 +66,12 @@
     <ClInclude Include="TripletHandlers.h">
       <Filter>Header Files\compressors</Filter>
     </ClInclude>
+    <ClInclude Include="IInitialValuesConstructor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleBasedConstructor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Quantizer.cpp">
@@ -94,6 +100,9 @@
     </ClCompile>
     <ClCompile Include="TripletHandlers.cpp">
       <Filter>Source Files\compressors</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleBasedConstructor.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

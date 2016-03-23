@@ -126,6 +126,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="IBinaryStream.h" />
+    <ClInclude Include="IInitialValuesConstructor.h" />
     <ClInclude Include="LZ77HuffmanCompressor.h" />
     <ClInclude Include="ModularArithmeticCompressor.h" />
     <ClInclude Include="FileInputStream.h" />
@@ -136,6 +137,7 @@
     <ClInclude Include="ICompressor.h" />
     <ClInclude Include="Quantizer.h" />
     <ClInclude Include="huffman.h" />
+    <ClInclude Include="SampleBasedConstructor.h" />
     <ClInclude Include="TripletHandlers.h" />
     <ClInclude Include="utilities.h" />
   </ItemGroup>
@@ -148,6 +150,7 @@
     <ClCompile Include="FileOutputStream.cpp" />
     <ClCompile Include="HuffmanCompressor.cpp" />
     <ClCompile Include="Quantizer.cpp" />
+    <ClCompile Include="SampleBasedConstructor.cpp" />
     <ClCompile Include="TripletHandlers.cpp" />
   </ItemGroup>
   <ItemGroup>
