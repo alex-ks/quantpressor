@@ -17,9 +17,11 @@ namespace quantpressor
 		public:
 			LZ77HuffmanCompressor( width_t window_width );
 
-			virtual CompressionResult compress( const module_api::pIGrid & grid, const Quantizations & quantizations, IBinaryOutputStream &stream ) override;
+			virtual CompressionResult compress( const module_api::pIGrid &grid, 
+												const Quantizations & quantizations, 
+												IBinaryOutputStream &stream ) const override;
 
-			virtual module_api::pIGrid decompress( IBinaryInputStream &stream ) override;
+			virtual module_api::pIGrid decompress( IBinaryInputStream &stream ) const override;
 		};
 
 		template <typename T> class Window : public std::deque<T>

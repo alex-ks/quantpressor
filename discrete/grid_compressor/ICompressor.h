@@ -22,16 +22,15 @@ namespace quantpressor
 	class ICompressor
 	{
 	public:
-
 		///<summary>
-		///<para>Compresses specified grid to stream</para>
-		///<para>Returns vector of avetage bit counts per symbol for each column</para>
+		///<para>Compresses specified grid to stream.</para>
+		///<para>Returns structure describing compression characteristics.</para>
 		///</summary>
 		virtual CompressionResult compress( const module_api::pIGrid &grid,
 											const Quantizations &quantizations,
-											IBinaryOutputStream &stream ) = 0;
+											IBinaryOutputStream &stream ) const = 0;
 
-		virtual module_api::pIGrid decompress( IBinaryInputStream &stream ) = 0;
+		virtual module_api::pIGrid decompress( IBinaryInputStream &stream ) const = 0;
 
 		virtual ~ICompressor( ) { }
 	};

@@ -6,7 +6,7 @@
 
 const int quantpressor::Quantizer::START_N = 100;
 const int quantpressor::Quantizer::SEARCH_ITER_COUNT = 10;
-const double quantpressor::Quantizer::ERROR_AREA = 0.1;
+const double quantpressor::Quantizer::ERROR_AREA = 0.005;
 
 using std::sqrt;
 using std::fabs;
@@ -45,50 +45,46 @@ quantpressor::Quantization quantpressor::Quantizer::quantize( int quant_count,
 {
 	Quantization q = constructor->construct_initial_values( quant_count );
 
-	double eps;
-	int invariant_count;
+	double eps, prev_eps;
 	int count = 0;
+
+	eps = prev_eps = std::numeric_limits<double>::max( );
 
 	do
 	{
-#pragma omp parallel for
 		for ( int i = 1; i < quant_count - 1; ++i )
 			q.borders[i] = ( q.codes[i] + q.codes[i - 1] ) / 2;
 
-		invariant_count = 0;
-
-#pragma omp parallel for
 		for ( int i = 0; i < quant_count - 1; ++i )
 		{
 			auto c = distribution.expectation( q.borders[i], q.borders[i + 1] );
-
-			if ( std::abs( q.codes[i] - c ) < 1e-7 )
-			{
-#pragma omp atomic
-				++invariant_count;
-			}
-
 			q.codes[i] = c;
 		}
 
+		prev_eps = eps;
 		eps = 0.0;
 
-//#pragma omp parallel for reduction( + : eps )
 		for ( int i = 0; i < quant_count - 1; ++i )
 			eps += distribution.deviation( q.borders[i], q.borders[i + 1] );
 		++count;
 	}
-	while ( eps > max_error && invariant_count < quant_count - 1 && ( iteration_count <= 0 || count < iteration_count ) );
+	while ( eps > max_error 
+			&& ( fabs( eps - prev_eps ) > ERROR_AREA * prev_eps )
+			&& ( iteration_count <= 0 || count < iteration_count ) );
 
 	q.deviation = eps;
 
 	double entropy = 0.0;
 
-#pragma omp parallel for reduction( - : entropy )
 	for ( int i = 1; i < quant_count; ++i )
 	{
 		double p = distribution( q.borders[i] ) - distribution( q.borders[i - 1] );
-		entropy -= p != 0.0 ? p * std::log2( p ) : 0.0;
+		entropy -= p > 0.0 ? p * std::log2( p ) : 0.0;
+
+		if ( isnan( entropy ) )
+		{
+			int x = 0;
+		}
 	}
 
 	q.entropy = entropy;

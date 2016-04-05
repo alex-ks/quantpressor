@@ -32,7 +32,7 @@ namespace quantpressor
 		HuffmanCompressor::ColumnInfo HuffmanCompressor::compress_column( uint column,
 																		  const pIGrid &grid,
 																		  const Quantization &quantization,
-																		  IBinaryOutputStream &s )
+																		  IBinaryOutputStream &s ) const
 		{
 			ColumnInfo result = ColumnInfo( );
 			result.min = std::numeric_limits<double>::max( );
@@ -98,7 +98,7 @@ namespace quantpressor
 
 		CompressionResult HuffmanCompressor::compress( const pIGrid &grid,
 													   const Quantizations &quantizations,
-													   IBinaryOutputStream &stream )
+													   IBinaryOutputStream &stream ) const
 		{
 			stream << grid->get_row_count( );
 			stream << grid->get_column_count( );
@@ -123,7 +123,7 @@ namespace quantpressor
 			return std::move( result );
 		}
 
-		module_api::pIGrid HuffmanCompressor::decompress( quantpressor::IBinaryInputStream &stream )
+		module_api::pIGrid HuffmanCompressor::decompress( quantpressor::IBinaryInputStream &stream ) const
 		{
 			unsigned int row_count, column_count;
 			stream >> row_count;

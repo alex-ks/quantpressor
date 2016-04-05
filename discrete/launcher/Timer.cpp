@@ -4,7 +4,7 @@
 
 #include <windows.h>
 
-namespace time
+namespace time_measurement
 {
 	void Timer::start( )
 	{

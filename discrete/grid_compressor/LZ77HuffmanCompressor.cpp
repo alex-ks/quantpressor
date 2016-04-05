@@ -28,7 +28,10 @@ namespace quantpressor
 			
 		}
 
-		HuffmanTree<double> create_column_tree( const module_api::pIGrid &grid, uint column, const Quantization &q, ColumnInfo *result )
+		HuffmanTree<double> create_column_tree( const module_api::pIGrid &grid, 
+												uint column, 
+												const Quantization &q, 
+												ColumnInfo *result )
 		{
 			map<double, ull> counts;
 
@@ -58,7 +61,7 @@ namespace quantpressor
 
 		CompressionResult LZ77HuffmanCompressor::compress( const module_api::pIGrid & grid,
 														   const Quantizations & quantizations,
-														   IBinaryOutputStream & stream )
+														   IBinaryOutputStream & stream ) const
 		{
 			auto column_count = grid->get_column_count( );
 			auto row_count = grid->get_row_count( );
@@ -95,29 +98,38 @@ namespace quantpressor
 			index_t i;
 			for ( i = 0; i < symbol_count; ++i )
 			{
+				if ( i % 1000 == 0 )
+				{
+					printf( "%d\n", i );
+				}
+
 				width_t dist = 0, length = 0;
 				index_t start = window_start + ( i % column_count + column_count - window_start % column_count ) % column_count;
 
-				for ( index_t j = start; j < i; j += column_count )
+				for ( index_t j = start; j < i; )
 				{
 					width_t curr_length = 0;
 					while ( find_code_index( grid->get_value( ( i + curr_length ) / column_count, 
 															  ( i + curr_length ) % column_count ), 
 											 quantizations[( i + curr_length ) % column_count] )
-							== find_code_index( grid->get_value( ( j + curr_length ) / column_count, 
-																 ( j + curr_length ) % column_count ), 
-												quantizations[( j + curr_length ) % column_count] )
+							== find_code_index( grid->get_value( j / column_count, 
+																 j % column_count ), 
+												quantizations[j % column_count] )
 							&& i + curr_length < symbol_count
-							&& j + curr_length < i )
+							&& j < i )
 					{
 						++curr_length;
+						++j;
 					}
 
 					if ( curr_length > length )
 					{
 						length = curr_length;
-						dist = j - window_start;
+						dist = j - curr_length - window_start;
 					}
+
+					++j;
+					j += ( i % column_count + column_count - j % column_count ) % column_count;
 				}
 
 				auto &code = symbol_trees[( i + length ) % column_count].get_encoding( find_code( grid->get_value( ( i + length ) / column_count, ( i + length ) % column_count ), 
@@ -156,7 +168,7 @@ namespace quantpressor
 			return result;
 		}
 
-		module_api::pIGrid LZ77HuffmanCompressor::decompress( IBinaryInputStream &stream )
+		module_api::pIGrid LZ77HuffmanCompressor::decompress( IBinaryInputStream &stream ) const
 		{
 			uint column_count, row_count;
 			stream >> row_count >> column_count;

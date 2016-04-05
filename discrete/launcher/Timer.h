@@ -1,6 +1,6 @@
 #pragma once
 
-namespace time
+namespace time_measurement
 {
 	class Timer
 	{

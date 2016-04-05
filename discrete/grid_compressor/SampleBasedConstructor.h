@@ -8,9 +8,10 @@ namespace quantpressor
 	{
 	private:
 		std::vector<double> sample;
+		double L, R;
 
 	public:
-		SampleBasedConstructor( const std::vector<double> sample );
+		SampleBasedConstructor( double left, double right, const std::vector<double> sample );
 		~SampleBasedConstructor( ) override;
 
 		Quantization construct_initial_values( int quant_count ) const override;

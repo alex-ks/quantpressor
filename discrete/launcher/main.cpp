@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 
+#include <ppl.h>
 #include <lib.h>
 #include <Quantizer.h>
 #include <HuffmanCompressor.h>
@@ -10,6 +11,7 @@
 #include <ExponentialDistribution.h>
 
 #include <SampleExtractor.h>
+#include <SampleBasedConstructor.h>
 
 #include <ColumnSorter.h>
 
@@ -82,7 +84,7 @@ void write_grid( string file_name, const pIGrid &grid )
 
 #define QUANT_COUNT 100
 #define ROW_COUNT 1e6
-#define EPS 1e-2
+#define EPS 1e-3
 
 int main_io( )
 {
@@ -102,7 +104,7 @@ int main_io( )
 	return 0;
 }
 
-using time::Timer;
+using time_measurement::Timer;
 
 #include <IIntegrator.h>
 #include <TrapezoidalIntegrator.h>
@@ -575,16 +577,31 @@ int main_lz77( )
 	return 0;
 }
 
+int main_sample( )
+{
+	vector<double> sample = { 2, 5, 3, 4.5, -1, 16 };
+	
+	auto constructor = SampleBasedConstructor( -2, 17, sample );
+
+	auto q = constructor.construct_initial_values( sample.size( ) + 1 );
+	q = constructor.construct_initial_values( 3 );
+	q = constructor.construct_initial_values( 10 );
+	q = constructor.construct_initial_values( 2 * sample.size( ) + 2 );
+	q = constructor.construct_initial_values( 100 );
+
+	return 0;
+}
+
 Quantizations quantize_grid( const pIGrid &grid,
 							 vector<double> *left_borders,
 							 vector<double> *right_borders,
 							 vector<pIDistribution> *distrs )
 {
-	Quantizations qs;
+	Quantizations qs( grid->get_column_count( ) );
 
-	auto extractor = SampleExtractor( );
-
-	for ( int column = 0; column < grid->get_column_count( ); ++column )
+	//for ( int column = 0; column < grid->get_column_count( ); ++column )
+	concurrency::critical_section crit;
+	concurrency::parallel_for( 0, ( int )grid->get_column_count( ), [&]( int column )
 	{
 		double left = numeric_limits<double>::max( );
 		double right = numeric_limits<double>::min( );
@@ -602,18 +619,21 @@ Quantizations quantize_grid( const pIGrid &grid,
 		left -= EPS;
 		right += EPS;
 
+		SampleExtractor extractor;
 		auto sample = extractor.extract_sample( column, grid );
 		auto method = DetailedApproximationMethod::gauss_kernel( sample );
+		Quantizer quantizer( left, right );
 
 		pIDistribution empirical = make_heap_aware<FastEmpiricalDistribution>( std::move( sample ), method );
 
 		distrs->push_back( empirical );
 
-		Quantizer quantizer( left, right );
-		qs.push_back( quantizer.quantize( EPS, *empirical ) );
+		qs[column] = quantizer.quantize( EPS, *empirical );
 
+		crit.lock( );
 		cout << "Column " << column << " quantized" << endl;
-	}
+		crit.unlock( );
+	} );
 
 	return std::move( qs );
 }
@@ -621,7 +641,7 @@ Quantizations quantize_grid( const pIGrid &grid,
 int main/*_compress_check*/( )
 {
 	auto reader = CsvReader( 1024 * 1024, L';' );
-	auto grid = reader.read( L"real_data.csv", false, false );
+	auto grid = reader.read( L"grid.csv", false, false );
 
 	//FILE *old_stdout;
 	//_wfreopen_s( &old_stdout, L"output.txt", L"w", stdout );
@@ -660,17 +680,17 @@ int main/*_compress_check*/( )
 
 	EmptyOutputStream stream;
 
-	auto result = h_compressor.compress( grid, qs, stream );
+	/*auto result = h_compressor.compress( grid, qs, stream );
 	cout << "Huffman:" << endl << endl;
 	print_result( result, qs, left_borders, right_borders );
 	cout << "Size = " << stream.get_current_position( ) / 8.0 / 1024.0 << "KB" << endl << endl;
-	stream.clear( );
+	stream.clear( );*/
 
-	/*auto result = lz_compressor.compress( grid, qs, stream );
+	auto result = lz_compressor.compress( grid, qs, stream );
 	cout << "LZ77:" << endl << endl;
 	print_result( result, qs, left_borders, right_borders );
 	cout << "Size = " << stream.get_current_position( ) / 8.0 / 1024.0 << "KB" << endl << endl;
-	stream.clear( );*/
+	stream.clear( );
 
 	/*result = lz_compressor.compress( sorted_grid, sorted_qs, stream );
 	cout << "LZ77:" << endl << endl;
