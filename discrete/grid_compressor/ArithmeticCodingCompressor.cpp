@@ -12,14 +12,16 @@ namespace quantpressor
 		using std::vector;
 		template<typename K, typename V> using map = std::unordered_map<K, V>;
 
+		static const int BIT_COUNT = 8;
+
 		inline bool most_significant_bit( ArithmeticCodingCompressor::register_type reg )
 		{
-			return reg >> ( sizeof( reg ) - 1 ) == 1;
+			return reg >> ( sizeof( reg ) * BIT_COUNT - 1 ) == 1;
 		}
 
 		inline bool prev_most_significant_bit( ArithmeticCodingCompressor::register_type reg )
 		{
-			return ( reg << 1 ) >> ( sizeof( reg ) - 1 ) == 1;
+			return ( reg << 1 ) >> ( sizeof( reg ) * BIT_COUNT - 1 ) == 1;
 		}
 
 		CompressionResult ArithmeticCodingCompressor::compress( const module_api::pIGrid &grid,
@@ -86,7 +88,7 @@ namespace quantpressor
 			// assume that message is one column
 			symbol_count = grid->get_row_count( );
 			low = 0;
-			high = symbol_count - 1;
+			high = register_type( -1 ) - 1;
 			int s = 0;
 
 			auto start_pos = stream.get_current_position( );
@@ -119,6 +121,9 @@ namespace quantpressor
 						low <<= 1;
 						high = ( high << 1 ) + 1;
 					}
+
+					low = low & ( register_type( -1 ) >> 1 );
+					high = high | ( register_type( 1 ) << ( sizeof( register_type ) * BIT_COUNT - 1 ) );
 				}
 			}
 
@@ -127,12 +132,15 @@ namespace quantpressor
 			for ( int i = 0; i < s; ++i )
 			{ stream.write_bit( !prev_most_significant_bit( low ) ); }
 
-			auto bps = double( stream.get_current_position( ) - start_pos ) / ( symbol_count + 1 );
+			auto bit_count = stream.get_current_position( ) - start_pos;
+			auto bps = double( bit_count ) / ( symbol_count + 1 );
 
 			for ( int i = 0; i < grid->get_column_count( ); ++i )
 			{
 				result.columns_bps.push_back( bps );
 			}
+
+			result.extra_results[L"Data size"] = std::to_wstring( double( bit_count ) / BIT_COUNT / 1024 ) + L" KB";
 
 			return std::move( result );
 		}
@@ -144,6 +152,12 @@ namespace quantpressor
 			stream >> column_count;
 			
 			auto qumulative = deserialize_frequences( column_count, stream );
+
+			register_type low, high, delta, current_bits, symbol_count = row_count;
+
+			low = 0;
+			high = register_type( -1 ) - 1;
+			stream >> current_bits;
 
 			throw module_api::NotImplementedException( );
 		}

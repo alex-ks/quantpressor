@@ -7,6 +7,7 @@
 #include <Quantizer.h>
 #include <HuffmanCompressor.h>
 #include <LZ77HuffmanCompressor.h>
+#include <ArithmeticCodingCompressor.h>
 #include <NormalDistribution.h>
 #include <ExponentialDistribution.h>
 
@@ -599,9 +600,9 @@ Quantizations quantize_grid( const pIGrid &grid,
 {
 	Quantizations qs( grid->get_column_count( ) );
 
-	//for ( int column = 0; column < grid->get_column_count( ); ++column )
-	concurrency::critical_section crit;
-	concurrency::parallel_for( 0, ( int )grid->get_column_count( ), [&]( int column )
+	for ( int column = 0; column < grid->get_column_count( ); ++column )
+	/*concurrency::critical_section crit;
+	concurrency::parallel_for( 0, ( int )grid->get_column_count( ), [&]( int column )*/
 	{
 		double left = numeric_limits<double>::max( );
 		double right = numeric_limits<double>::min( );
@@ -630,10 +631,10 @@ Quantizations quantize_grid( const pIGrid &grid,
 
 		qs[column] = quantizer.quantize( EPS, *empirical );
 
-		crit.lock( );
+		//crit.lock( );
 		cout << "Column " << column << " quantized" << endl;
-		crit.unlock( );
-	} );
+		//crit.unlock( );
+	}// );
 
 	return std::move( qs );
 }
@@ -641,7 +642,7 @@ Quantizations quantize_grid( const pIGrid &grid,
 int main/*_compress_check*/( )
 {
 	auto reader = CsvReader( 1024 * 1024, L';' );
-	auto grid = reader.read( L"grid.csv", false, false );
+	auto grid = reader.read( L"real_data.csv", false, false );
 
 	//FILE *old_stdout;
 	//_wfreopen_s( &old_stdout, L"output.txt", L"w", stdout );
@@ -677,8 +678,16 @@ int main/*_compress_check*/( )
 
 	compressors::HuffmanCompressor h_compressor;
 	compressors::LZ77HuffmanCompressor lz_compressor( 1024 * 10 );
+	compressors::ArithmeticCodingCompressor ac_compressor;
+
 
 	EmptyOutputStream stream;
+
+	auto result = ac_compressor.compress( grid, qs, stream );
+	cout << "Arithmetic coding:" << endl << endl;
+	print_result( result, qs, left_borders, right_borders );
+	cout << "Size = " << stream.get_current_position( ) / 8.0 / 1024.0 << "KB" << endl << endl;
+	stream.clear( );
 
 	/*auto result = h_compressor.compress( grid, qs, stream );
 	cout << "Huffman:" << endl << endl;
@@ -686,11 +695,11 @@ int main/*_compress_check*/( )
 	cout << "Size = " << stream.get_current_position( ) / 8.0 / 1024.0 << "KB" << endl << endl;
 	stream.clear( );*/
 
-	auto result = lz_compressor.compress( grid, qs, stream );
+	/*auto result = lz_compressor.compress( grid, qs, stream );
 	cout << "LZ77:" << endl << endl;
 	print_result( result, qs, left_borders, right_borders );
 	cout << "Size = " << stream.get_current_position( ) / 8.0 / 1024.0 << "KB" << endl << endl;
-	stream.clear( );
+	stream.clear( );*/
 
 	/*result = lz_compressor.compress( sorted_grid, sorted_qs, stream );
 	cout << "LZ77:" << endl << endl;

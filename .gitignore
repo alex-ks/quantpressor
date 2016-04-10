@@ -206,3 +206,4 @@ FakesAssemblies/
 *.rar
 *.zip
 *.out
+/discrete/discrete.VC.db
