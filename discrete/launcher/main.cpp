@@ -683,11 +683,26 @@ int main/*_compress_check*/( )
 
 	EmptyOutputStream stream;
 
-	auto result = ac_compressor.compress( grid, qs, stream );
+	{
+		FileOutputStream stream( L"compressed.out" );
+
+		auto result = ac_compressor.compress( grid, qs, stream );
+		cout << "Arithmetic coding:" << endl << endl;
+		print_result( result, qs, left_borders, right_borders );
+		cout << "Size = " << stream.get_current_position( ) / 8.0 / 1024.0 << "KB" << endl << endl;
+	}
+
+	{
+		FileInputStream stream( L"compressed.out" );
+
+		auto result = ac_compressor.decompress( stream );
+	}
+
+	/*auto result = ac_compressor.compress( grid, qs, stream );
 	cout << "Arithmetic coding:" << endl << endl;
 	print_result( result, qs, left_borders, right_borders );
 	cout << "Size = " << stream.get_current_position( ) / 8.0 / 1024.0 << "KB" << endl << endl;
-	stream.clear( );
+	stream.clear( );*/
 
 	/*auto result = h_compressor.compress( grid, qs, stream );
 	cout << "Huffman:" << endl << endl;

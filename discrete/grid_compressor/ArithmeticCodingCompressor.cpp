@@ -1,6 +1,7 @@
 #include "ArithmeticCodingCompressor.h"
 
 #include <exception.h>
+#include <RoughGrid.h>
 #include <cmath>
 
 #include "utilities.h"
@@ -13,15 +14,38 @@ namespace quantpressor
 		template<typename K, typename V> using map = std::unordered_map<K, V>;
 
 		static const int BIT_COUNT = 8;
+		static const int REGISTER_SIZE = sizeof( ArithmeticCodingCompressor::register_type ) * ( BIT_COUNT / 2 );
+		static const ArithmeticCodingCompressor::register_type FULL_REGISTER = ~( ArithmeticCodingCompressor::register_type( -1 ) << REGISTER_SIZE );
 
+		// using 32 of 64 register bits; other will be reserved to prevent the overflow during multiplication
 		inline bool most_significant_bit( ArithmeticCodingCompressor::register_type reg )
 		{
-			return reg >> ( sizeof( reg ) * BIT_COUNT - 1 ) == 1;
+			return ( reg >> ( REGISTER_SIZE - 1 ) ) % 2 == 1;
 		}
 
 		inline bool prev_most_significant_bit( ArithmeticCodingCompressor::register_type reg )
 		{
-			return ( reg << 1 ) >> ( sizeof( reg ) * BIT_COUNT - 1 ) == 1;
+			return ( ( reg << 1 ) >> ( REGISTER_SIZE - 1 ) ) % 2 == 1;
+		}
+
+		inline void set_most_significant_bit( ArithmeticCodingCompressor::register_type &reg, bool bit )
+		{
+			reg = bit ? ( reg | ( 1 << ( REGISTER_SIZE - 1 ) ) ) : ( reg & ( FULL_REGISTER >> 1 ) );
+		}
+
+		inline void cut_register( ArithmeticCodingCompressor::register_type &reg )
+		{
+			reg &= ~( FULL_REGISTER << REGISTER_SIZE );
+		}
+
+		inline void fill_register( IBinaryInputStream &stream, ArithmeticCodingCompressor::register_type &reg )
+		{
+			reg = 0;
+			for ( int i = 0; i < REGISTER_SIZE; ++i )
+			{
+				reg <<= 1;
+				reg += stream.read_bit( ) ? 1 : 0;
+			}
 		}
 
 		CompressionResult ArithmeticCodingCompressor::compress( const module_api::pIGrid &grid,
@@ -88,7 +112,8 @@ namespace quantpressor
 			// assume that message is one column
 			symbol_count = grid->get_row_count( );
 			low = 0;
-			high = register_type( -1 ) - 1;
+			//high = register_type( -1 ) - 1;
+			high = FULL_REGISTER;
 			int s = 0;
 
 			auto start_pos = stream.get_current_position( );
@@ -122,8 +147,10 @@ namespace quantpressor
 						high = ( high << 1 ) + 1;
 					}
 
-					low = low & ( register_type( -1 ) >> 1 );
-					high = high | ( register_type( 1 ) << ( sizeof( register_type ) * BIT_COUNT - 1 ) );
+					set_most_significant_bit( low, false );
+					set_most_significant_bit( high, true );
+					cut_register( low );
+					cut_register( high );
 				}
 			}
 
@@ -133,7 +160,7 @@ namespace quantpressor
 			{ stream.write_bit( !prev_most_significant_bit( low ) ); }
 
 			auto bit_count = stream.get_current_position( ) - start_pos;
-			auto bps = double( bit_count ) / ( symbol_count + 1 );
+			auto bps = double( bit_count ) / ( grid->get_row_count( ) * grid->get_column_count( ) );
 
 			for ( int i = 0; i < grid->get_column_count( ); ++i )
 			{
@@ -156,10 +183,65 @@ namespace quantpressor
 			register_type low, high, delta, current_bits, symbol_count = row_count;
 
 			low = 0;
-			high = register_type( -1 ) - 1;
-			stream >> current_bits;
+			//high = register_type( -1 ) - 1;
+			high = FULL_REGISTER;
+			fill_register( stream, current_bits );
 
-			throw module_api::NotImplementedException( );
+			auto result = module_api::make_heap_aware<igor::RoughGrid>( row_count, column_count );
+
+			for ( int i = 0; i < row_count * column_count; ++i )
+			{
+				delta = high - low + 1;
+				auto z = ( symbol_count * ( current_bits - low + 1 ) - 1 ) / delta;
+				
+				double symbol;
+				ull symbol_qumulative = 0, next_cumulative = symbol_count;
+
+				for ( auto &pair : qumulative[i % column_count] )
+				{
+					if ( z >= pair.second && symbol_qumulative <= pair.second )
+					{
+						symbol_qumulative = pair.second;
+						symbol = pair.first;
+					}
+					if ( z < pair.second && next_cumulative >= pair.second )
+					{
+						next_cumulative = pair.second;
+					}
+				}
+
+				high = low + ( delta * next_cumulative ) / symbol_count - 1;
+				low = low + ( delta * symbol_qumulative ) / symbol_count;
+
+				while ( most_significant_bit( low ) == most_significant_bit( high ) )
+				{
+					current_bits <<= 1;
+					current_bits += stream.read_bit( ) ? 1 : 0;
+					low <<= 1;
+					high = ( high << 1 ) + 1;
+				}
+
+				auto bit = most_significant_bit( current_bits );
+
+				while ( prev_most_significant_bit( low ) && !prev_most_significant_bit( high ) )
+				{
+					current_bits <<= 1;
+					current_bits += stream.read_bit( ) ? 1 : 0;
+					low <<= 1;
+					high = ( high << 1 ) + 1;
+				}
+
+				set_most_significant_bit( low, false );
+				set_most_significant_bit( high, true );
+				set_most_significant_bit( current_bits, bit );
+				cut_register( low );
+				cut_register( high );
+				cut_register( current_bits );
+
+				result->set_value( i / column_count, i % column_count, symbol );
+			}
+
+			return std::move( result );
 		}
 
 		void ArithmeticCodingCompressor::serialize_frequences( const std::vector<std::unordered_map<double, ull>>& frequences, IBinaryOutputStream & stream ) const
@@ -168,10 +250,24 @@ namespace quantpressor
 			{
 				stream << freq_map.size( );
 				
+				ull max_q = 0;
+				for ( auto &pair : freq_map )
+				{
+					if ( pair.second > max_q )
+					{ max_q = pair.second; }
+				}
+
+				byte length = std::ceil( std::log2( max_q ) );
+				stream << length;
+
 				for ( auto &pair : freq_map )
 				{
 					stream << pair.first;
-					stream << pair.second;
+
+					for ( int i = length - 1; i >= 0; --i )
+					{
+						stream.write_bit( ( pair.second >> i ) % 2 );
+					}
 				}
 			}
 		}
@@ -186,14 +282,24 @@ namespace quantpressor
 				size_t map_size;
 				stream >> map_size;
 
+				byte length;
+				stream >> length;
+
 				map<double, ull> freqs;
 				double key;
-				ull value;
 
 				for ( int j = 0; j < map_size; ++j )
 				{
 					stream >> key;
-					stream >> value;
+
+					ull value = 0;
+
+					for ( int i = 0; i < length; ++i )
+					{
+						value <<= 1;
+						value += stream.read_bit( ) ? 1 : 0;
+					}
+
 					freqs[key] = value;
 				}
 
