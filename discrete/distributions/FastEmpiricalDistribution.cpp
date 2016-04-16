@@ -284,6 +284,7 @@ namespace distributions
 		double h = factor * std::sqrt( deviation ) * std::pow( sample.size( ), -0.2 );
 
 		// temporary stub for better quantization convergence
-		return gauss_kernel( h < 10 ? h : 0.35 );
+		//return gauss_kernel( h < 10 ? h : 0.35 );
+		return gauss_kernel( h );
 	}
 }

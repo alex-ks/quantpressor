@@ -3,6 +3,7 @@
 #include <exception.h>
 #include <RoughGrid.h>
 #include <cmath>
+#include <algorithm>
 
 #include "utilities.h"
 
@@ -11,6 +12,7 @@ namespace quantpressor
 	namespace compressors
 	{
 		using std::vector;
+		using std::pair;
 		template<typename K, typename V> using map = std::unordered_map<K, V>;
 
 		static const int BIT_COUNT = 8;
@@ -48,6 +50,57 @@ namespace quantpressor
 			}
 		}
 
+		map<double, ull> freqs_to_cumuls( const map<double, ull> &freqs )
+		{
+			auto sorted_freqs = vector<pair<double, ull>>( freqs.begin( ), freqs.end( ) );
+			std::sort( sorted_freqs.begin( ), sorted_freqs.end( ), []( pair<double, ull> a, pair<double, ull> b )
+			{
+				return a.first < b.first;
+			} );
+
+			map<double, ull> cumuls;
+
+			cumuls[sorted_freqs[0].first] = 0;
+			for ( int i = 1; i < sorted_freqs.size( ); ++i )
+			{
+				cumuls[sorted_freqs[i].first] =
+					cumuls[sorted_freqs[i - 1].first] +
+					sorted_freqs[i - 1].second;
+			}
+
+			return std::move( cumuls );
+		}
+
+		///<summary>Removes codes with zero frequence from quantization</summary>
+		Quantizations cut_quantizations( const Quantizations &quantizations, int column_count, const vector<map<double, ull>> &frequences )
+		{
+			Quantizations new_quantizations( column_count );
+
+			for ( int column = 0; column < column_count; ++column )
+			{
+				vector<double> new_borders, new_codes;
+
+				for ( int i = 0; i < quantizations[column].codes.size( ); ++i )
+				{
+					if ( frequences[column].find( quantizations[column].codes[i] ) != frequences[column].end( ) )
+					{
+						new_borders.push_back( quantizations[column].borders[i] );
+						new_codes.push_back( quantizations[column].codes[i] );
+					}
+				}
+
+				new_borders[0] = quantizations[column].borders[0];
+				new_borders.push_back( quantizations[column].borders[quantizations[column].borders.size( ) - 1] );
+
+				new_quantizations[column].borders = std::move( new_borders );
+				new_quantizations[column].codes = std::move( new_codes );
+				new_quantizations[column].deviation = quantizations[column].deviation;
+				new_quantizations[column].entropy = quantizations[column].entropy;
+			}
+
+			return std::move( new_quantizations );
+		}
+
 		CompressionResult ArithmeticCodingCompressor::compress( const module_api::pIGrid &grid,
 																const Quantizations &quantizations, 
 																IBinaryOutputStream &stream ) const
@@ -63,6 +116,7 @@ namespace quantpressor
 				avg_err( grid->get_column_count( ) ), 
 				max_err( grid->get_column_count( ) );
 
+			// filling frequences table, counting errors
 			for ( int column = 0; column < grid->get_column_count( ); ++column )
 			{
 				min_err[column] = std::numeric_limits<double>::max( );
@@ -92,27 +146,21 @@ namespace quantpressor
 			result.max_errors = std::move( max_err );
 			result.real_variances = std::move( dxs );
 
-			vector<map<double, ull>> qumulative( grid->get_column_count( ) );
+			Quantizations new_quantizations = cut_quantizations( quantizations,
+																 grid->get_column_count( ),
+																 frequences );
+
+			vector<map<double, ull>> cumulative( grid->get_column_count( ) );
 
 			for ( int column = 0; column < grid->get_column_count( ); ++column )
-			{
-				qumulative[column][quantizations[column].codes[0]] = 0;
+			{ cumulative[column] = freqs_to_cumuls( frequences[column] ); }
 
-				for ( int i = 1; i < quantizations[column].codes.size( ); ++i )
-				{
-					qumulative[column][quantizations[column].codes[i]] =
-						qumulative[column][quantizations[column].codes[i - 1]] +
-						frequences[column][quantizations[column].codes[i - 1]];
-				}
-			}
-
-			serialize_frequences( qumulative, stream );
+			serialize_frequences( frequences, stream );
 
 			register_type low, high, delta, symbol_count;
 			// assume that message is one column
 			symbol_count = grid->get_row_count( );
 			low = 0;
-			//high = register_type( -1 ) - 1;
 			high = FULL_REGISTER;
 			int s = 0;
 
@@ -122,13 +170,13 @@ namespace quantpressor
 			{
 				for ( int column = 0; column < grid->get_column_count( ); ++column )
 				{
-					auto index = find_code_index( grid->get_value( row, column ), quantizations[column] );
+					auto index = find_code_index( grid->get_value( row, column ), new_quantizations[column] );
 					
 					delta = high - low + 1;
-					high = index != ( quantizations[column].codes.size( ) - 1 ) ?
-						low + ( delta * qumulative[column][quantizations[column].codes[index + 1]] ) / symbol_count - 1
+					high = index != ( new_quantizations[column].codes.size( ) - 1 ) ?
+						low + ( delta * cumulative[column][new_quantizations[column].codes[index + 1]] ) / symbol_count - 1
 						: low + delta - 1;
-					low = low + ( delta * qumulative[column][quantizations[column].codes[index]] ) / symbol_count;
+					low = low + ( delta * cumulative[column][new_quantizations[column].codes[index]] ) / symbol_count;
 					
 					while ( most_significant_bit( low ) == most_significant_bit( high ) )
 					{
@@ -178,12 +226,11 @@ namespace quantpressor
 			stream >> row_count;
 			stream >> column_count;
 			
-			auto qumulative = deserialize_frequences( column_count, stream );
+			auto cumulative = deserialize_cumulative( column_count, stream );
 
 			register_type low, high, delta, current_bits, symbol_count = row_count;
 
 			low = 0;
-			//high = register_type( -1 ) - 1;
 			high = FULL_REGISTER;
 			fill_register( stream, current_bits );
 
@@ -195,13 +242,13 @@ namespace quantpressor
 				auto z = ( symbol_count * ( current_bits - low + 1 ) - 1 ) / delta;
 				
 				double symbol;
-				ull symbol_qumulative = 0, next_cumulative = symbol_count;
+				ull symbol_cumulative = 0, next_cumulative = symbol_count;
 
-				for ( auto &pair : qumulative[i % column_count] )
+				for ( auto &pair : cumulative[i % column_count] )
 				{
-					if ( z >= pair.second && symbol_qumulative <= pair.second )
+					if ( z >= pair.second && symbol_cumulative <= pair.second )
 					{
-						symbol_qumulative = pair.second;
+						symbol_cumulative = pair.second;
 						symbol = pair.first;
 					}
 					if ( z < pair.second && next_cumulative >= pair.second )
@@ -211,7 +258,7 @@ namespace quantpressor
 				}
 
 				high = low + ( delta * next_cumulative ) / symbol_count - 1;
-				low = low + ( delta * symbol_qumulative ) / symbol_count;
+				low = low + ( delta * symbol_cumulative ) / symbol_count;
 
 				while ( most_significant_bit( low ) == most_significant_bit( high ) )
 				{
@@ -257,7 +304,7 @@ namespace quantpressor
 					{ max_q = pair.second; }
 				}
 
-				byte length = std::ceil( std::log2( max_q ) );
+				byte length = static_cast<byte>( std::log2( max_q ) ) + 1;
 				stream << length;
 
 				for ( auto &pair : freq_map )
@@ -272,13 +319,18 @@ namespace quantpressor
 			}
 		}
 
-		std::vector<std::unordered_map<double, ull>> ArithmeticCodingCompressor::deserialize_frequences( module_api::uint column_count,
+		std::vector<std::unordered_map<double, ull>> ArithmeticCodingCompressor::deserialize_cumulative( module_api::uint column_count,
 																										 IBinaryInputStream & stream ) const
 		{
 			vector<map<double, ull>> result;
 
 			for ( int i = 0; i < column_count; ++i )
 			{
+				if ( i == 3 )
+				{
+					int x = 0;
+				}
+
 				size_t map_size;
 				stream >> map_size;
 
@@ -303,7 +355,7 @@ namespace quantpressor
 					freqs[key] = value;
 				}
 
-				result.push_back( std::move( freqs ) );
+				result.push_back( freqs_to_cumuls( freqs ) );
 			}
 
 			return std::move( result );

@@ -54,7 +54,7 @@ namespace quantpressor
 		bit_set TripletWriter::encode_dist( width_t distance )
 		{
 			bit_set code;
-			int bit_count = ceil( log2( letter_number ) );
+			int bit_count = static_cast<int>( log2( letter_number ) ) + 1;
 			for ( int i = bit_count - 1; i >= 0; --i )
 			{
 				code.push_back( ( 1 << i ) & distance );

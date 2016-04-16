@@ -16,7 +16,7 @@ namespace quantpressor
 			void serialize_frequences( const std::vector<std::unordered_map<double, ull>> &frequences,
 									   IBinaryOutputStream &stream ) const;
 
-			std::vector<std::unordered_map<double, ull>> deserialize_frequences( module_api::uint column_count,
+			std::vector<std::unordered_map<double, ull>> deserialize_cumulative( module_api::uint column_count,
 																				 IBinaryInputStream &stream ) const;
 
 		public:

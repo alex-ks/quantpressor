@@ -11,6 +11,8 @@
 #include <NormalDistribution.h>
 #include <ExponentialDistribution.h>
 
+#include <RoughGrid.h>
+
 #include <SampleExtractor.h>
 #include <SampleBasedConstructor.h>
 
@@ -85,7 +87,7 @@ void write_grid( string file_name, const pIGrid &grid )
 
 #define QUANT_COUNT 100
 #define ROW_COUNT 1e6
-#define EPS 1e-3
+#define EPS 5e-3
 
 int main_io( )
 {
@@ -644,13 +646,15 @@ int main/*_compress_check*/( )
 	auto reader = CsvReader( 1024 * 1024, L';' );
 	auto grid = reader.read( L"real_data.csv", false, false );
 
-	//FILE *old_stdout;
-	//_wfreopen_s( &old_stdout, L"output.txt", L"w", stdout );
-
-	//auto sorter = column_sort::ColumnSorter( );
-	//auto sorted_grid = sorter.sort_columns( grid );
-
 	cout << "Grid loaded" << endl;
+
+	/*FILE *old_stdout;
+	_wfreopen_s( &old_stdout, L"output.txt", L"w", stdout );*/
+
+	/*auto sorter = column_sort::ColumnSorter( );
+	auto sorted_grid = sorter.sort_columns( grid );
+
+	cout << "Grid sorted" << endl;*/
 
 	Timer timer;
 	double quatize_time;
@@ -667,11 +671,11 @@ int main/*_compress_check*/( )
 
 	vector<pIDistribution> sorted_distrs;
 
-	vector<double>
+	/*vector<double>
 		sorted_left_borders( grid->get_column_count( ) ),
 		sorted_right_borders( grid->get_column_count( ) );
 
-	//auto sorted_qs = quantize_grid( sorted_grid, method, &sorted_left_borders, &sorted_right_borders, &sorted_distrs );
+	auto sorted_qs = quantize_grid( sorted_grid, &sorted_left_borders, &sorted_right_borders, &sorted_distrs );*/
 
 	quatize_time = timer.stop( );
 	cout << "Quantization time: " << quatize_time << "s" << endl;
@@ -704,17 +708,17 @@ int main/*_compress_check*/( )
 	cout << "Size = " << stream.get_current_position( ) / 8.0 / 1024.0 << "KB" << endl << endl;
 	stream.clear( );*/
 
-	/*auto result = h_compressor.compress( grid, qs, stream );
-	cout << "Huffman:" << endl << endl;
-	print_result( result, qs, left_borders, right_borders );
-	cout << "Size = " << stream.get_current_position( ) / 8.0 / 1024.0 << "KB" << endl << endl;
-	stream.clear( );*/
+	///*auto */result = h_compressor.compress( grid, qs, stream );
+	//cout << "Huffman:" << endl << endl;
+	//print_result( result, qs, left_borders, right_borders );
+	//cout << "Size = " << stream.get_current_position( ) / 8.0 / 1024.0 << "KB" << endl << endl;
+	//stream.clear( );
 
-	/*auto result = lz_compressor.compress( grid, qs, stream );
-	cout << "LZ77:" << endl << endl;
-	print_result( result, qs, left_borders, right_borders );
-	cout << "Size = " << stream.get_current_position( ) / 8.0 / 1024.0 << "KB" << endl << endl;
-	stream.clear( );*/
+	///*auto */result = lz_compressor.compress( grid, qs, stream );
+	//cout << "LZ77:" << endl << endl;
+	//print_result( result, qs, left_borders, right_borders );
+	//cout << "Size = " << stream.get_current_position( ) / 8.0 / 1024.0 << "KB" << endl << endl;
+	//stream.clear( );
 
 	/*result = lz_compressor.compress( sorted_grid, sorted_qs, stream );
 	cout << "LZ77:" << endl << endl;
@@ -723,6 +727,48 @@ int main/*_compress_check*/( )
 	stream.clear( );*/
 
 	system( "pause" );
+
+	return 0;
+}
+
+int main_entropy_graphic_data( )
+{
+	const int count = 200;
+
+	auto reader = CsvReader( 1024 * 1024, L';' );
+	auto grid = reader.read( L"real_data.csv", false, false );
+	
+	auto result = make_heap_aware<igor::RoughGrid>( count, 3 );
+
+	double left = numeric_limits<double>::max( );
+	double right = numeric_limits<double>::min( );
+
+	for ( int row = 0; row < grid->get_row_count( ); ++row )
+	{
+		auto value = grid->get_value( row, 0 );
+		left = left < value ? left : value;
+		right = right > value ? right : value;
+	}
+
+	left -= EPS;
+	right += EPS;
+
+	SampleExtractor extractor;
+	auto sample = extractor.extract_sample( 0, grid );
+	auto method = DetailedApproximationMethod::gauss_kernel( sample );
+	Quantizer quantizer( left, right );
+
+	auto empirical = FastEmpiricalDistribution( std::move( sample ), method );
+
+	for ( int i = 0; i < count; ++i )
+	{
+		auto q = quantizer.quantize( i + 2, EPS, empirical );
+		result->set_value( i, 0, i + 2 );
+		result->set_value( i, 1, q.deviation );
+		result->set_value( i, 2, q.entropy );
+	}
+
+	write_grid( "eps_ent.csv", result );
 
 	return 0;
 }

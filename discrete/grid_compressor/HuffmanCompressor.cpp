@@ -110,6 +110,8 @@ namespace quantpressor
 
 			CompressionResult result = CompressionResult( );
 
+			double total_bit_count = 0;
+
 			for ( uint i = 0; i < grid->get_column_count( ); ++i )
 			{
 				auto info = compress_column( i, grid, quantizations[i], stream );
@@ -118,7 +120,10 @@ namespace quantpressor
 				result.min_errors.push_back( info.min );
 				result.avg_errors.push_back( info.avg );
 				result.max_errors.push_back( info.max );
+				total_bit_count += info.bps * grid->get_row_count( );
 			}
+
+			result.extra_results[L"Data size"] = std::to_wstring( total_bit_count / 8 / 1024 ) + L" KB";
 
 			return std::move( result );
 		}

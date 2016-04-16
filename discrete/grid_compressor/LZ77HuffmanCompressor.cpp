@@ -98,11 +98,6 @@ namespace quantpressor
 			index_t i;
 			for ( i = 0; i < symbol_count; ++i )
 			{
-				if ( i % 1000 == 0 )
-				{
-					printf( "%d\n", i );
-				}
-
 				width_t dist = 0, length = 0;
 				index_t start = window_start + ( i % column_count + column_count - window_start % column_count ) % column_count;
 
