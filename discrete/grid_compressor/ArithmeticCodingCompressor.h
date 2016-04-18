@@ -10,7 +10,7 @@ namespace quantpressor
 	namespace compressors
 	{
 
-		class ArithmeticCodingCompressor : ICompressor
+		class ArithmeticCodingCompressor : public ICompressor
 		{
 		private:
 			void serialize_frequences( const std::vector<std::unordered_map<double, ull>> &frequences,

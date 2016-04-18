@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -25,23 +26,7 @@ namespace Quantpressor.UI.ViewModels
 			set { _error = double.Parse( value ); }
 		}
 
-		private int? _quantCount = 100;
-		public string QuantCount
-		{
-			get { return _quantCount != null ? _quantCount.ToString( ) : ""; }
-			set
-			{
-				int quantCount;
-				if ( int.TryParse( value, out quantCount ) )
-				{
-					_quantCount = quantCount;
-				}
-				else
-				{
-					_quantCount = null;
-				}
-			}
-		}
+		public string CompressionScheme { get; set; } = Properties.Resources.HuffmanCode;
 
 		public MainViewModel( IWindowManager manager )
 		{
@@ -66,21 +51,21 @@ namespace Quantpressor.UI.ViewModels
 			return await openTask;
 		}
 
-		private Func<CompressionResultViewModel> CompressAndShow( IGrid grid, string outName, ProgressViewModel progressBar )
+		private readonly object _lockGuard = new object( );
+
+		private Func<CompressionResultViewModel> CompressAndShow( IGrid grid, ICompressor compressor, string outName, ProgressViewModel progressBar )
 		{
-			var distrs = new List<IDistribution>( );
 			double[] leftBorders = new double[grid.ColumnCount];
 			double[] rightBorders = new double[grid.ColumnCount];
 
-			var quantizations = new List<IQuantization>( );
+			var qs = new IQuantization[grid.ColumnCount];
+			var distrs = new IDistribution[grid.ColumnCount];
 
-			for ( int column = 0; column < grid.ColumnCount; ++column )
+			progressBar.Status = "Quantizing columns...";
+
+			Parallel.For( 0, grid.ColumnCount, column =>
 			{
-				progressBar.Status = $"Quantizing column #{column + 1}...";
-				progressBar.Progress = ( double )column / ( grid.ColumnCount + 1 );
-
 				var distr = new EmpiricalDistribution( grid, column );
-				distrs.Add( distr );
 
 				leftBorders[column] = double.MaxValue;
 				rightBorders[column] = double.MinValue;
@@ -93,8 +78,18 @@ namespace Quantpressor.UI.ViewModels
 				}
 
 				var quantizer = new Quantizer( leftBorders[column] - _error, rightBorders[column] + _error );
-				quantizations.Add( quantizer.Quantize( _quantCount.Value, _error, distr ) );
-			}
+				var quantization = quantizer.Quantize( _error, distr );
+
+				lock ( _lockGuard )
+				{
+					progressBar.Progress += 1.0 / ( grid.ColumnCount + 1 );
+					distrs[column] = distr;
+					qs[column] = quantization;
+				}
+			} );
+
+			var quantizations = new List<IQuantization>( qs );
+			var distributions = new List<IDistribution>( distrs );
 
 			progressBar.Status = "Writing archive...";
 			progressBar.Progress = ( double )grid.ColumnCount / ( grid.ColumnCount + 1 );
@@ -103,21 +98,38 @@ namespace Quantpressor.UI.ViewModels
 
 			using ( var stream = new FileOutputStream( outName ) )
 			{
-				var compressor = new HuffmanCompressor( );
 				result = compressor.Compress( grid, quantizations, stream );
 			}
 
 			progressBar.Progress = 1.0;
 			progressBar.TryClose( );
 
-			return ( ) => new CompressionResultViewModel( result, leftBorders, rightBorders, quantizations, distrs );
+			return ( ) => new CompressionResultViewModel( result, leftBorders, rightBorders, quantizations, distributions );
 		}
 
 		public async void Compress( )
 		{
-			if ( _quantCount == null )
+			ICompressor compressor;
+			string extension;
+
+			if ( CompressionScheme == Properties.Resources.HuffmanCode )
 			{
-				MessageBox.Show( "Enter correct quant count", "Error", MessageBoxButton.OK, MessageBoxImage.Error );
+				compressor = new HuffmanCompressor( );
+				extension = Properties.Resources.HuffmanCodeExt;
+			}
+			else if ( CompressionScheme == Properties.Resources.Lz77 )
+			{
+				compressor = new LZ77HuffmanCompressor( DefaultWidth );
+				extension = Properties.Resources.Lz77Ext;
+			}
+			else if ( CompressionScheme == Properties.Resources.ArithmeticCode )
+			{
+				compressor = new ArithmeticCodingCompressor( );
+				extension = Properties.Resources.ArithmeticCodeExt;
+			}
+			else
+			{
+				MessageBox.Show( "Unknown compression scheme!", "Error", MessageBoxButton.OK, MessageBoxImage.Error );
 				return;
 			}
 
@@ -128,8 +140,8 @@ namespace Quantpressor.UI.ViewModels
 
 			var dialog = new SaveFileDialog
 			{
-				DefaultExt = "out",
-				Filter = "Quantized and compressed grid|*.out",
+				DefaultExt = extension,
+				Filter = $"Quantized and compressed grid|*.{extension}",
 				AddExtension = true
 			};
 
@@ -147,7 +159,7 @@ namespace Quantpressor.UI.ViewModels
 
 			_manager.ShowWindow( progressBar, null, settings );
 
-			var compressTask = Task.Factory.StartNew( ( ) => CompressAndShow( grid, outName, progressBar ) );
+			var compressTask = Task.Factory.StartNew( ( ) => CompressAndShow( grid, compressor, outName, progressBar ) );
 
 			var createResultViewModel = await compressTask;
 
@@ -160,6 +172,57 @@ namespace Quantpressor.UI.ViewModels
 			resultSettings.SizeToContent = SizeToContent.Manual;
 
 			_manager.ShowWindow( createResultViewModel( ), null, resultSettings );
+		}
+
+		public const int DefaultWidth = 1024 * 10;
+
+		public async void Decompress( )
+		{
+			var openFileDialog = new OpenFileDialog
+			{
+				Filter = $"Quantized huffman-encoded file|*.{Properties.Resources.HuffmanCodeExt}|" +
+				         $"Quantized LZ77-encoded file|*.{Properties.Resources.Lz77Ext}" +
+				         $"Quantized arithmetic-encoded file|*.{Properties.Resources.ArithmeticCodeExt}",
+				ValidateNames = true
+			};
+
+			if ( openFileDialog.ShowDialog( ) != true )
+				return;
+
+			try
+			{
+				using ( var input = new FileInputStream( openFileDialog.FileName ) )
+				{
+					var dialog = new SaveFileDialog
+					{
+						DefaultExt = "csv",
+						Filter = "Text file|*.csv",
+						AddExtension = true
+					};
+
+					if ( dialog.ShowDialog( ) != true )
+						return;
+
+					var ext = Path.GetExtension( openFileDialog.FileName );
+
+					ICompressor compressor;
+
+					if ( ext == Properties.Resources.ArithmeticCodeExt )
+					{ compressor = new ArithmeticCodingCompressor( ); }
+					else if ( ext == Properties.Resources.Lz77Ext )
+					{ compressor = new LZ77HuffmanCompressor( DefaultWidth ); }
+					else
+					{ compressor = new HuffmanCompressor( ); }
+
+					//var grid = compressor.Decompress( input );
+
+					throw new NotImplementedException( "Csv writing is not implemented!" );
+				}
+			}
+			catch ( Exception e )
+			{
+				MessageBox.Show( e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error );
+			}
 		}
 	}
 }

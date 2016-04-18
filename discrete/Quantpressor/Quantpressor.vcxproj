@@ -138,12 +138,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ArithmeticCodingCompressor.h" />
     <ClInclude Include="CsvGridReader.h" />
     <ClInclude Include="EmpiricalDistribution.h" />
     <ClInclude Include="FileInputStream.h" />
     <ClInclude Include="FileOutputStream.h" />
     <ClInclude Include="HuffmanCompressor.h" />
     <ClInclude Include="INativeDistribution.h" />
+    <ClInclude Include="LZ77HuffmanCompressor.h" />
+    <ClInclude Include="NativeCompressorWrapper.h" />
     <ClInclude Include="NativeGrid.h" />
     <ClInclude Include="NativeQuantization.h" />
     <ClInclude Include="Quantizer.h" />
@@ -151,12 +154,15 @@
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ArithmeticCodingCompressor.cpp" />
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="CsvGridReader.cpp" />
     <ClCompile Include="EmpiricalDistribution.cpp" />
     <ClCompile Include="FileInputStream.cpp" />
     <ClCompile Include="FileOutputStream.cpp" />
     <ClCompile Include="HuffmanCompressor.cpp" />
+    <ClCompile Include="LZ77HuffmanCompressor.cpp" />
+    <ClCompile Include="NativeCompressorWrapper.cpp" />
     <ClCompile Include="NativeGrid.cpp" />
     <ClCompile Include="NativeQuantization.cpp" />
     <ClCompile Include="Quantizer.cpp" />

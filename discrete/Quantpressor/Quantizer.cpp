@@ -30,4 +30,14 @@ namespace Quantpressor
 		auto &nativeDistr = *( wrapper->NativePtr( ) );
 		return gcnew NativeQuantization( quantizer->quantize( quantCount, maxError, nativeDistr ) );
 	}
+
+	IQuantization ^Quantizer::Quantize( double maxError, IDistribution ^distribution )
+	{
+		auto wrapper = dynamic_cast< INativeDistribution ^ >( distribution );
+		if ( wrapper == nullptr )
+			throw gcnew System::ArgumentException( "Can handle only native distributions" );
+
+		auto &nativeDistr = *( wrapper->NativePtr( ) );
+		return gcnew NativeQuantization( quantizer->quantize( maxError, nativeDistr ) );
+	}
 }

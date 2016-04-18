@@ -5,10 +5,10 @@ namespace Quantpressor
 {
 	namespace Compressors
 	{
-		public ref class HuffmanCompressor : public NativeCompressorWrapper
+		public ref class ArithmeticCodingCompressor : public NativeCompressorWrapper
 		{
 		public:
-			HuffmanCompressor( );
+			ArithmeticCodingCompressor( );
 		};
 	}
 }

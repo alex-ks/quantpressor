@@ -22,7 +22,7 @@ namespace Quantpressor.UI.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources {
+    public class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace Quantpressor.UI.Properties {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Quantpressor.UI.Properties.Resources", typeof(Resources).Assembly);
@@ -51,12 +51,66 @@ namespace Quantpressor.UI.Properties {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Arithmetic code.
+        /// </summary>
+        public static string ArithmeticCode {
+            get {
+                return ResourceManager.GetString("ArithmeticCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to qac.
+        /// </summary>
+        public static string ArithmeticCodeExt {
+            get {
+                return ResourceManager.GetString("ArithmeticCodeExt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Huffman code.
+        /// </summary>
+        public static string HuffmanCode {
+            get {
+                return ResourceManager.GetString("HuffmanCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to qhc.
+        /// </summary>
+        public static string HuffmanCodeExt {
+            get {
+                return ResourceManager.GetString("HuffmanCodeExt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to LZ77.
+        /// </summary>
+        public static string Lz77 {
+            get {
+                return ResourceManager.GetString("Lz77", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to qlz.
+        /// </summary>
+        public static string Lz77Ext {
+            get {
+                return ResourceManager.GetString("Lz77Ext", resourceCulture);
             }
         }
     }

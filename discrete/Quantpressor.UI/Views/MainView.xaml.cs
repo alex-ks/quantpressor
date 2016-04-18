@@ -35,16 +35,5 @@ namespace Quantpressor.UI.Views
 			Regex regex = new Regex( "[^0-9.]+" ); //regex that matches disallowed text
 			return !regex.IsMatch( text );
 		}
-
-		private static bool IsNaturalNumber( string text )
-		{
-			Regex regex = new Regex( "[^0-9]+" ); //regex that matches disallowed text
-			return !regex.IsMatch( text );
-		}
-
-		private void QuantCountBox_OnPreviewTextInput( object sender, TextCompositionEventArgs e )
-		{
-			e.Handled = !IsNaturalNumber( e.Text );
-		}
 	}
 }

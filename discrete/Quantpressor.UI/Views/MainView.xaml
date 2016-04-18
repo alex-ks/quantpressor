@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Quantpressor.UI.Views"
+		xmlns:props="clr-namespace:Quantpressor.UI.Properties"
         xmlns:cal="http://www.caliburnproject.org"
         mc:Ignorable="d"
         Title="MainView" 
@@ -27,7 +28,7 @@
                    Grid.Row="0"
                    Grid.Column="0"/>
 
-        <TextBlock Text="Quant count:"
+        <TextBlock Text="Compression scheme:"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"
                    Grid.Row="1"
@@ -38,11 +39,14 @@
                  Margin="5"
                  Grid.Row="0"
                  Grid.Column="1"/>
-        <TextBox Text="{Binding QuantCount, UpdateSourceTrigger=PropertyChanged}"
-                 PreviewTextInput="QuantCountBox_OnPreviewTextInput"
-                 Margin="5"
-                 Grid.Row="1"
-                 Grid.Column="1"/>
+		<ComboBox Text="{Binding CompressionScheme, UpdateSourceTrigger=PropertyChanged}"
+                  Margin="5"
+                  Grid.Row="1"
+                  Grid.Column="1">
+			<TextBlock Text="{x:Static props:Resources.ArithmeticCode}"/>
+			<TextBlock Text="{x:Static props:Resources.HuffmanCode}"/>
+			<TextBlock Text="{x:Static props:Resources.Lz77}"/>
+		</ComboBox>
         
         <Button Content="Compress"
                 Margin="10"
@@ -50,6 +54,7 @@
                 Grid.Row="2"
                 Grid.Column="0"/>
         <Button Content="Decompress"
+				cal:Message.Attach="Decompress"
                 Margin="10"
                 Grid.Row="2"
                 Grid.Column="1"/>

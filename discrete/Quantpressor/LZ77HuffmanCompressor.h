@@ -5,10 +5,10 @@ namespace Quantpressor
 {
 	namespace Compressors
 	{
-		public ref class HuffmanCompressor : public NativeCompressorWrapper
+		public ref class LZ77HuffmanCompressor : public NativeCompressorWrapper
 		{
 		public:
-			HuffmanCompressor( );
+			LZ77HuffmanCompressor( int windowWidth );
 		};
 	}
 }

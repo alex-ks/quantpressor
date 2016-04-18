@@ -39,6 +39,15 @@
     <ClInclude Include="INativeDistribution.h">
       <Filter>Distributions</Filter>
     </ClInclude>
+    <ClInclude Include="LZ77HuffmanCompressor.h">
+      <Filter>Compressors</Filter>
+    </ClInclude>
+    <ClInclude Include="ArithmeticCodingCompressor.h">
+      <Filter>Compressors</Filter>
+    </ClInclude>
+    <ClInclude Include="NativeCompressorWrapper.h">
+      <Filter>Compressors</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
@@ -60,6 +69,15 @@
       <Filter>FileIO</Filter>
     </ClCompile>
     <ClCompile Include="Quantizer.cpp" />
+    <ClCompile Include="LZ77HuffmanCompressor.cpp">
+      <Filter>Compressors</Filter>
+    </ClCompile>
+    <ClCompile Include="ArithmeticCodingCompressor.cpp">
+      <Filter>Compressors</Filter>
+    </ClCompile>
+    <ClCompile Include="NativeCompressorWrapper.cpp">
+      <Filter>Compressors</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />

@@ -15,7 +15,10 @@ namespace Quantpressor
 		!Quantizer( );
 
 		IQuantization ^Quantize( int quantCount,
-								 double max_error,
+								 double maxError,
+								 IDistribution ^distribution );
+
+		IQuantization ^Quantize( double maxError,
 								 IDistribution ^distribution );
 	};
 }
