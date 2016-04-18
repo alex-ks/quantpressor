@@ -206,4 +206,7 @@ FakesAssemblies/
 *.rar
 *.zip
 *.out
+*.qhc
+*.qlz
+*.qac
 /discrete/discrete.VC.db
