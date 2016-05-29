@@ -111,11 +111,11 @@ quantpressor::Quantization quantpressor::Quantizer::quantize( double max_error,
 	auto right = n;
 	n = left + ( right - left ) / 2;
 
-	while ( fabs( q.deviation - max_error ) > ERROR_AREA * max_error
+	while ( ( fabs( q.deviation - max_error ) > ERROR_AREA * max_error || q.deviation > max_error )
 			&& n != left
 			&& n != right )
 	{
-		q = quantize( n, SEARCH_ITER_COUNT, max_error, distribution );
+		q = quantize( n, max_error, distribution );
 
 		if ( q.deviation > max_error )
 		{ left = n; }
@@ -123,8 +123,6 @@ quantpressor::Quantization quantpressor::Quantizer::quantize( double max_error,
 		{ right = n; }
 		n = left + ( right - left ) / 2;
 	}
-	
-	q = quantize( q.get_quant_count( ), max_error, distribution );
 
 	return std::move( q );
 }

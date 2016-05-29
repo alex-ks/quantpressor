@@ -23,6 +23,8 @@
 
 #include "Timer.h"
 
+#include <GridQuantizer.h>
+
 using namespace std;
 using namespace module_api;
 using namespace distributions;
@@ -87,7 +89,7 @@ void write_grid( string file_name, const pIGrid &grid )
 
 #define QUANT_COUNT 100
 #define ROW_COUNT 1e6
-#define EPS 5e-3
+#define EPS 1e-3
 
 int main_io( )
 {
@@ -641,7 +643,7 @@ Quantizations quantize_grid( const pIGrid &grid,
 	return std::move( qs );
 }
 
-int main/*_compress_check*/( )
+int main_compress_check( )
 {
 	auto reader = CsvReader( 1024 * 1024, L';' );
 	auto grid = reader.read( L"real_data.csv", false, false );
@@ -687,7 +689,7 @@ int main/*_compress_check*/( )
 
 	EmptyOutputStream stream;
 
-	{
+	/*{
 		FileOutputStream stream( L"compressed.out" );
 
 		auto result = ac_compressor.compress( grid, qs, stream );
@@ -700,19 +702,19 @@ int main/*_compress_check*/( )
 		FileInputStream stream( L"compressed.out" );
 
 		auto result = ac_compressor.decompress( stream );
-	}
+	}*/
 
-	/*auto result = ac_compressor.compress( grid, qs, stream );
+	auto result = ac_compressor.compress( grid, qs, stream );
 	cout << "Arithmetic coding:" << endl << endl;
 	print_result( result, qs, left_borders, right_borders );
 	cout << "Size = " << stream.get_current_position( ) / 8.0 / 1024.0 << "KB" << endl << endl;
-	stream.clear( );*/
+	stream.clear( );
 
-	///*auto */result = h_compressor.compress( grid, qs, stream );
-	//cout << "Huffman:" << endl << endl;
-	//print_result( result, qs, left_borders, right_borders );
-	//cout << "Size = " << stream.get_current_position( ) / 8.0 / 1024.0 << "KB" << endl << endl;
-	//stream.clear( );
+	/*auto result = h_compressor.compress( grid, qs, stream );
+	cout << "Huffman:" << endl << endl;
+	print_result( result, qs, left_borders, right_borders );
+	cout << "Size = " << stream.get_current_position( ) / 8.0 / 1024.0 << "KB" << endl << endl;
+	stream.clear( );*/
 
 	///*auto */result = lz_compressor.compress( grid, qs, stream );
 	//cout << "LZ77:" << endl << endl;
@@ -769,6 +771,118 @@ int main_entropy_graphic_data( )
 	}
 
 	write_grid( "eps_ent.csv", result );
+
+	return 0;
+}
+
+int main_sample_extractor_check( )
+{
+	auto reader = CsvReader( 1024 * 1024, L';' );
+	auto grid = reader.read( L"real_data.csv", false, false );
+
+	SampleExtractor extractor( 10 );
+
+	auto sample = extractor.extract_sample( 0, grid );
+
+	return 0;
+}
+
+int main_complex_compression( )
+{
+	auto reader = CsvReader( 1024 * 1024, L';' );
+	auto grid = reader.read( L"real_data.csv", false, false );
+
+	cout << "Grid loaded" << endl;
+
+	auto compressor = HuffmanCompressor( );
+	auto quantizer = GridQuantizer( );
+
+	vector<double> errors( grid->get_column_count( ) );
+
+	for ( auto &error : errors )
+	{ error = EPS; }
+
+	Timer timer;
+
+	//timer.start( );
+	auto qs = quantizer.quantize_grid( grid, errors );
+	//auto time = timer.stop( );
+
+	EmptyOutputStream stream;
+
+	compressor.compress( grid, qs, stream );
+
+	cout << time << endl;
+
+	return 0;
+}
+
+int main/*_quant_test*/( )
+{
+	//auto reader = CsvReader( 1024 * 1024, L';' );
+	//auto grid = reader.read( L"grid.csv", false, false );
+
+	vector<pIDistribution> distrs =
+	{
+		pIDistribution( new NormalDistribution( 0, 1 ) ),
+		pIDistribution( new ExponentialDistribution( 2 ) )
+	};
+
+	auto grid = generate_grid( 1e6, distrs );
+	write_grid( "norm_exp.csv", grid );
+
+	cout << "Grid loaded" << endl;
+
+	auto compressor = HuffmanCompressor( );
+
+	vector<double> errors( grid->get_column_count( ) );
+
+	for ( auto &error : errors )
+	{ error = EPS; }
+
+	Quantizations real_qs;
+
+	for ( int column = 0; column < grid->get_column_count( ); ++column )
+	{
+		double left = numeric_limits<double>::max( ),
+			right = numeric_limits<double>::min( );
+
+		for ( int i = 0; i < grid->get_row_count( ); ++i )
+		{
+			auto value = grid->get_value( i, column );
+			left = left < value ? left : value;
+			right = right > value ? right : value;
+		}
+
+		Quantizer quantizer( left, right );
+		real_qs.push_back( quantizer.quantize( EPS, *distrs[column] ) );
+	}
+
+	auto grid_quantizer = GridQuantizer( );
+	auto empr_qs = grid_quantizer.quantize_grid( grid, errors );
+
+	EmptyOutputStream stream;
+
+	auto result_grid = make_heap_aware<igor::RoughGrid>( 2, 8 );
+
+	auto real_result = compressor.compress( grid, real_qs, stream );
+	auto empr_result = compressor.compress( grid, empr_qs, stream );
+	stream.clear( );
+
+	for ( int i = 0; i < real_qs.size( ); ++i )
+	{
+		result_grid->set_value( 0, 0 + i * 4, real_qs[i].entropy );
+		result_grid->set_value( 0, 1 + i * 4, empr_qs[i].entropy );
+		result_grid->set_value( 0, 2 + i * 4, real_result.columns_bps[i] );
+		result_grid->set_value( 0, 3 + i * 4, empr_result.columns_bps[i] );
+
+		result_grid->set_value( 1, 0 + i * 4, real_qs[i].deviation );
+		result_grid->set_value( 1, 1 + i * 4, empr_qs[i].deviation );
+		result_grid->set_value( 1, 2 + i * 4, real_result.real_variances[i] );
+		result_grid->set_value( 1, 3 + i * 4, empr_result.real_variances[i] );
+	}
+
+	write_grid( "result.csv", result_grid );
 
 	return 0;
 }

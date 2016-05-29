@@ -22,5 +22,9 @@ namespace distributions
 
 		double expectation( ) const override;
 		double expectation( double a, double b ) const override;
+
+		double density( double x ) const override;
+		double deviation( ) const override;
+		double deviation( double a, double b ) const override;
 	};
 }

@@ -210,3 +210,4 @@ FakesAssemblies/
 *.qlz
 *.qac
 /discrete/discrete.VC.db
+*.db

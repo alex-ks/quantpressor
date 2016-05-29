@@ -72,6 +72,9 @@
     <ClInclude Include="ArithmeticCodingCompressor.h">
       <Filter>Header Files\compressors</Filter>
     </ClInclude>
+    <ClInclude Include="GridQuantizer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Quantizer.cpp">
@@ -103,6 +106,9 @@
     </ClCompile>
     <ClCompile Include="ArithmeticCodingCompressor.cpp">
       <Filter>Source Files\compressors</Filter>
+    </ClCompile>
+    <ClCompile Include="GridQuantizer.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

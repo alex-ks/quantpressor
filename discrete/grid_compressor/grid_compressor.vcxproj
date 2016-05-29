@@ -35,7 +35,7 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -80,10 +80,14 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <OpenMPSupport>true</OpenMPSupport>
+      <BrowseInformation>true</BrowseInformation>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -132,6 +136,7 @@
     <ClInclude Include="ArithmeticCodingCompressor.h" />
     <ClInclude Include="IBinaryStream.h" />
     <ClInclude Include="IInitialValuesConstructor.h" />
+    <ClInclude Include="GridQuantizer.h" />
     <ClInclude Include="LZ77HuffmanCompressor.h" />
     <ClInclude Include="FileInputStream.h" />
     <ClInclude Include="FileOutputStream.h" />
@@ -149,6 +154,7 @@
     <ClCompile Include="..\..\Include\RoughGrid.cpp" />
     <ClCompile Include="..\..\Include\RoughMetadata.cpp" />
     <ClCompile Include="ArithmeticCodingCompressor.cpp" />
+    <ClCompile Include="GridQuantizer.cpp" />
     <ClCompile Include="LZ77HuffmanCompressor.cpp" />
     <ClCompile Include="FileInputStream.cpp" />
     <ClCompile Include="FileOutputStream.cpp" />

@@ -34,6 +34,28 @@ double distributions::ExponentialDistribution::expectation( double a, double b )
 	return ( func( b ) - func( a ) ) / ( this->operator()( b ) - this->operator()( a ) );
 }
 
+double distributions::ExponentialDistribution::density( double x ) const
+{
+	return x >= 0 ? lambda * std::exp( -lambda * x ) : 0.0;
+}
+
+double distributions::ExponentialDistribution::deviation( ) const
+{
+	return 1.0 / ( lambda * lambda );
+}
+
+double distributions::ExponentialDistribution::deviation( double a, double b ) const
+{
+	auto moment2 = [=]( double x )
+	{
+		return -exp( -lambda * x ) * ( lambda * lambda * x * x + 2 * lambda * x + 2 ) / ( lambda * lambda );
+	};
+	
+	double ex = expectation( a, b );
+
+	return moment2( b ) - moment2( a ) - ex * ex * ( this->operator()( b ) - this->operator()( a ) );
+}
+
 double distributions::ExponentialDistribution::generate( )
 {
 	return distr( random_source );

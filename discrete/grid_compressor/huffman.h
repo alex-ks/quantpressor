@@ -2,6 +2,7 @@
 #include <map>
 #include <queue>
 #include <vector>
+#include <unordered_map>
 #include <exception.h>
 
 #include "IBinaryInputStream.h"
@@ -135,7 +136,7 @@ namespace quantpressor
 
 			protected:
 				Node *root, *curr;
-				std::map<T, bit_set> encoding;
+				std::unordered_map<T, bit_set> encoding;
 
 				HuffmanTree( Node *tree_root ) : root( tree_root )
 				{

@@ -77,7 +77,7 @@ namespace Quantpressor.UI.ViewModels
 					rightBorders[column] = rightBorders[column] > value ? rightBorders[column] : value;
 				}
 
-				var quantizer = new Quantizer( leftBorders[column] - _error, rightBorders[column] + _error );
+				var quantizer = new Quantizer( leftBorders[column], rightBorders[column] );
 				var quantization = quantizer.Quantize( _error, distr );
 
 				lock ( _lockGuard )

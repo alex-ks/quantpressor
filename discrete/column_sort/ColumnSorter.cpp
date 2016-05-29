@@ -41,6 +41,8 @@ namespace quantpressor
 					second = ++links.begin( );
 				double max = 0.0;
 
+				bool reverse_first = false, reverse_second = false;
+
 				for ( auto i = links.begin( ); i != links.end( ); ++i )
 				{
 					for ( auto j = links.begin( ); j != links.end( ); ++j )
@@ -53,6 +55,7 @@ namespace quantpressor
 							first = i;
 							second = j;
 							max = abs( correlation_matrix( i->back( ), j->front( ) ) );
+							reverse_first = reverse_second = false;
 						}
 
 						if ( abs( correlation_matrix( i->front( ), j->back( ) ) ) > max )
@@ -60,6 +63,25 @@ namespace quantpressor
 							first = j;
 							second = i;
 							max = abs( correlation_matrix( i->front( ), j->back( ) ) );
+							reverse_first = reverse_second = false;
+						}
+
+						if ( abs( correlation_matrix( i->back( ), j->back( ) ) ) > max )
+						{
+							first = i;
+							second = j;
+							max = abs( correlation_matrix( i->back( ), j->back( ) ) );
+							reverse_first = false;
+							reverse_second = true;
+						}
+
+						if ( abs( correlation_matrix( i->front( ), j->front( ) ) ) > max )
+						{
+							first = i;
+							second = j;
+							max = abs( correlation_matrix( i->front( ), j->front( ) ) );
+							reverse_first = true;
+							reverse_second = false;
 						}
 					}
 				}
@@ -68,6 +90,11 @@ namespace quantpressor
 				auto right = std::move( *second );
 				links.erase( first );
 				links.erase( second );
+
+				if ( reverse_first )
+				{ left.reverse( ); }
+				if ( reverse_second )
+				{ right.reverse( ); }
 
 				left.splice( left.end( ), std::move( right ) );
 				links.insert( std::move( left ) );
