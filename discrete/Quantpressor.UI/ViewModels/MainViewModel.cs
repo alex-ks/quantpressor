@@ -17,14 +17,7 @@ namespace Quantpressor.UI.ViewModels
 {
 	class MainViewModel : PropertyChangedBase
 	{
-		private IWindowManager _manager;
-
-		private double _error = 1e-2;
-		public string Error
-		{
-			get { return _error.ToString( ); }
-			set { _error = double.Parse( value ); }
-		}
+		private readonly IWindowManager _manager;
 
 		public string CompressionScheme { get; set; } = Properties.Resources.HuffmanCode;
 
@@ -33,7 +26,7 @@ namespace Quantpressor.UI.ViewModels
 			_manager = manager;
 		}
 
-		private async Task<IGrid> OpenGrid( )
+		private Task<IGrid> OpenGrid( )
 		{
 			OpenFileDialog openFileDialog = new OpenFileDialog
 			{
@@ -41,19 +34,19 @@ namespace Quantpressor.UI.ViewModels
 				ValidateNames = true
 			};
 
-			if ( openFileDialog.ShowDialog( ) != true )
-				return null;
-
+			var fileName = openFileDialog.ShowDialog( ) == true ? openFileDialog.FileName : null;
 			var reader = new CsvGridReader( 1024 * 1024, ';' );
-			//return reader.Read( openFileDialog.FileName, false, false );
-			var openTask = new Task<IGrid>( ( ) => reader.Read( openFileDialog.FileName, false, false ) );
-			openTask.Start( );
-			return await openTask;
+
+			return Task<IGrid>.Factory.StartNew( ( ) => fileName != null ? reader.Read( fileName, false, false ) : null );
 		}
 
 		private readonly object _lockGuard = new object( );
 
-		private Func<CompressionResultViewModel> CompressAndShow( IGrid grid, ICompressor compressor, string outName, ProgressViewModel progressBar )
+		private CompressionStats Compress( IGrid grid,
+		                                   ICompressor compressor,
+										   double[] errors,
+										   string outName,
+		                                   ProgressViewModel progressBar )
 		{
 			double[] leftBorders = new double[grid.ColumnCount];
 			double[] rightBorders = new double[grid.ColumnCount];
@@ -78,7 +71,7 @@ namespace Quantpressor.UI.ViewModels
 				}
 
 				var quantizer = new Quantizer( leftBorders[column], rightBorders[column] );
-				var quantization = quantizer.Quantize( _error, distr );
+				var quantization = quantizer.Quantize( errors[column], distr );
 
 				lock ( _lockGuard )
 				{
@@ -104,7 +97,14 @@ namespace Quantpressor.UI.ViewModels
 			progressBar.Progress = 1.0;
 			progressBar.TryClose( );
 
-			return ( ) => new CompressionResultViewModel( result, leftBorders, rightBorders, quantizations, distributions );
+			return new CompressionStats
+			{
+				CompressionResult = result,
+				Distributions = distributions,
+				LeftBorders = leftBorders,
+				RightBorders = rightBorders,
+				Quantizations = quantizations
+			};
 		}
 
 		public async void Compress( )
@@ -112,31 +112,33 @@ namespace Quantpressor.UI.ViewModels
 			ICompressor compressor;
 			string extension;
 
-			if ( CompressionScheme == Properties.Resources.HuffmanCode )
-			{
-				compressor = new HuffmanCompressor( );
-				extension = Properties.Resources.HuffmanCodeExt;
-			}
-			else if ( CompressionScheme == Properties.Resources.Lz77 )
-			{
-				compressor = new LZ77HuffmanCompressor( DefaultWidth );
-				extension = Properties.Resources.Lz77Ext;
-			}
-			else if ( CompressionScheme == Properties.Resources.ArithmeticCode )
-			{
-				compressor = new ArithmeticCodingCompressor( );
-				extension = Properties.Resources.ArithmeticCodeExt;
-			}
-			else
-			{
-				MessageBox.Show( "Unknown compression scheme!", "Error", MessageBoxButton.OK, MessageBoxImage.Error );
-				return;
-			}
-
 			var grid = await OpenGrid( );
 
 			if ( grid == null )
 				return;
+
+			ChooseCompressor( out compressor, out extension );
+			if ( compressor == null || extension == null )
+			{ MessageBox.Show( "Unknown compression scheme!", "Error", MessageBoxButton.OK, MessageBoxImage.Error ); }
+
+			var columnNames = new List<string>( );
+			for ( var i = 0; i < grid.ColumnCount; ++i )
+			{ columnNames.Add( $"Column #{i}" ); }
+
+			dynamic paramsSettings = new ExpandoObject( );
+			paramsSettings.Height = 200;
+			paramsSettings.Width = 420;
+			paramsSettings.SizeToContent = SizeToContent.Manual;
+			paramsSettings.Title = "Compression parameters";
+
+			var compParams = new CompressionParamsViewModel( columnNames );
+
+			bool? result = _manager.ShowDialog( compParams,
+												null,
+												paramsSettings );
+
+			if ( result == null || !result.Value )
+			{ return; }
 
 			var dialog = new SaveFileDialog
 			{
@@ -147,6 +149,9 @@ namespace Quantpressor.UI.ViewModels
 
 			if ( dialog.ShowDialog( ) != true )
 				return;
+
+			var errors = ( from desc in compParams.Errors
+			               select desc.Error ).ToArray( );
 
 			string outName = dialog.FileName;
 
@@ -159,9 +164,8 @@ namespace Quantpressor.UI.ViewModels
 
 			_manager.ShowWindow( progressBar, null, settings );
 
-			var compressTask = Task.Factory.StartNew( ( ) => CompressAndShow( grid, compressor, outName, progressBar ) );
-
-			var createResultViewModel = await compressTask;
+			var stats =
+				await Task<CompressionStats>.Factory.StartNew( ( ) => Compress( grid, compressor, errors, outName, progressBar ) );
 
 			dynamic resultSettings = new ExpandoObject( );
 			resultSettings.Height = 450;
@@ -171,7 +175,7 @@ namespace Quantpressor.UI.ViewModels
 			resultSettings.Title = "Report";
 			resultSettings.SizeToContent = SizeToContent.Manual;
 
-			_manager.ShowWindow( createResultViewModel( ), null, resultSettings );
+			_manager.ShowWindow( new CompressionResultViewModel( stats ), null, resultSettings );
 		}
 
 		public const int DefaultWidth = 1024 * 10;
@@ -181,8 +185,8 @@ namespace Quantpressor.UI.ViewModels
 			var openFileDialog = new OpenFileDialog
 			{
 				Filter = $"Quantized huffman-encoded file|*.{Properties.Resources.HuffmanCodeExt}|" +
-				         $"Quantized LZ77-encoded file|*.{Properties.Resources.Lz77Ext}" +
-				         $"Quantized arithmetic-encoded file|*.{Properties.Resources.ArithmeticCodeExt}",
+						 $"Quantized LZ77-encoded file|*.{Properties.Resources.Lz77Ext}" +
+						 $"Quantized arithmetic-encoded file|*.{Properties.Resources.ArithmeticCodeExt}",
 				ValidateNames = true
 			};
 
@@ -222,6 +226,30 @@ namespace Quantpressor.UI.ViewModels
 			catch ( Exception e )
 			{
 				MessageBox.Show( e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error );
+			}
+		}
+
+		private void ChooseCompressor( out ICompressor compressor, out string extension )
+		{
+			if ( CompressionScheme == Properties.Resources.HuffmanCode )
+			{
+				compressor = new HuffmanCompressor( );
+				extension = Properties.Resources.HuffmanCodeExt;
+			}
+			else if ( CompressionScheme == Properties.Resources.Lz77 )
+			{
+				compressor = new LZ77HuffmanCompressor( DefaultWidth );
+				extension = Properties.Resources.Lz77Ext;
+			}
+			else if ( CompressionScheme == Properties.Resources.ArithmeticCode )
+			{
+				compressor = new ArithmeticCodingCompressor( );
+				extension = Properties.Resources.ArithmeticCodeExt;
+			}
+			else
+			{
+				extension = null;
+				compressor = null;
 			}
 		}
 	}

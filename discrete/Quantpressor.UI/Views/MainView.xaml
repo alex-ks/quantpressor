@@ -8,40 +8,28 @@
         xmlns:cal="http://www.caliburnproject.org"
         mc:Ignorable="d"
         Title="Quantpressor" 
-        Height="170" 
+        Height="130" 
         Width="300" 
         ResizeMode="NoResize">
     <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="30"/>
-            <RowDefinition Height="30"/>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="30"/>
             <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
-        
-        <TextBlock Text="Max error:"
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition/>
+			<ColumnDefinition/>
+		</Grid.ColumnDefinitions>
+
+		<TextBlock Text="Compression scheme:"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"
                    Grid.Row="0"
                    Grid.Column="0"/>
 
-        <TextBlock Text="Compression scheme:"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"
-                   Grid.Row="1"
-                   Grid.Column="0"/>
-
-        <TextBox Text="{Binding Error, UpdateSourceTrigger=PropertyChanged}" 
-                 PreviewTextInput="ErrorBox_OnPreviewTextInput"
-                 Margin="5"
-                 Grid.Row="0"
-                 Grid.Column="1"/>
 		<ComboBox Text="{Binding CompressionScheme, UpdateSourceTrigger=PropertyChanged}"
                   Margin="5"
-                  Grid.Row="1"
+                  Grid.Row="0"
                   Grid.Column="1">
 			<TextBlock Text="{x:Static props:Resources.ArithmeticCode}"/>
 			<TextBlock Text="{x:Static props:Resources.HuffmanCode}"/>
@@ -51,12 +39,12 @@
         <Button Content="Compress"
                 Margin="10"
                 cal:Message.Attach="Compress"
-                Grid.Row="2"
+                Grid.Row="1"
                 Grid.Column="0"/>
         <Button Content="Decompress"
 				cal:Message.Attach="Decompress"
                 Margin="10"
-                Grid.Row="2"
+                Grid.Row="1"
                 Grid.Column="1"/>
     </Grid>
 </Window>

@@ -11,18 +11,30 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace Quantpressor.UI.Views
 {
 	/// <summary>
-	/// Interaction logic for MainView.xaml
+	/// Interaction logic for CompressionParamsView.xaml
 	/// </summary>
-	public partial class MainView : Window
+	public partial class CompressionParamsView : UserControl
 	{
-		public MainView( )
+		public CompressionParamsView( )
 		{
 			InitializeComponent( );
+		}
+
+		private void ErrorBox_OnPreviewTextInput( object sender, TextCompositionEventArgs e )
+		{
+			e.Handled = !IsNumeric( e.Text );
+		}
+
+		private static bool IsNumeric( string text )
+		{
+			Regex regex = new Regex( "[^0-9.]+" ); //regex that matches disallowed text
+			return !regex.IsMatch( text );
 		}
 	}
 }

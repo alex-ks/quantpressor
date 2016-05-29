@@ -18,8 +18,8 @@ namespace Quantpressor.UI.ViewModels
 		public BindableCollection<TabItem> Plots { get; }
 
 		public CompressionResultViewModel( ICompressionResult compressionResult,
-		                                   double[] leftBorders,
-		                                   double[] rightBorders,
+										   double[] leftBorders,
+										   double[] rightBorders,
 										   IList<IQuantization> quantizations,
 										   IList<IDistribution> distributions )
 		{
@@ -31,11 +31,11 @@ namespace Quantpressor.UI.ViewModels
 				Result.Columns.Add( $"Column #{i + 1}" );
 			}
 
-			var bordersList = new List<object> {"Values interval"};
+			var bordersList = new List<object> { "Values interval" };
 			bordersList.AddRange( leftBorders.Select( ( t, i ) => $"[{t}; {rightBorders[i]}]" ) );
 			Result.Rows.Add( bordersList.ToArray( ) );
 
-			var entropyList = new List<object> {"Entropy"};
+			var entropyList = new List<object> { "Entropy" };
 			entropyList.AddRange( quantizations.Select( q => $"{q.Entropy}" ) );
 			Result.Rows.Add( entropyList.ToArray( ) );
 
@@ -47,11 +47,11 @@ namespace Quantpressor.UI.ViewModels
 			varianceList.AddRange( quantizations.Select( q => $"{q.Variance}" ) );
 			Result.Rows.Add( varianceList.ToArray( ) );
 
-			var realVariances = new List<object> {"Real variance"};
+			var realVariances = new List<object> { "Real variance" };
 			realVariances.AddRange( compressionResult.RealVariances.Select( d => $"{d}" ) );
 			Result.Rows.Add( realVariances.ToArray( ) );
 
-			var minErrors = new List<object> {"Minimal error"};
+			var minErrors = new List<object> { "Minimal error" };
 			minErrors.AddRange( compressionResult.MinErrors.Select( d => $"{d}" ) );
 			Result.Rows.Add( minErrors.ToArray( ) );
 
@@ -80,8 +80,14 @@ namespace Quantpressor.UI.ViewModels
 				model.Series.Add( func );
 				model.Subtitle = $"Expectation = {distributions[i].TotalExpectation}, Variance = {distributions[i].TotalVariance}";
 
-				Plots.Add( new TabItem { Content = new PlotViewModel { Model = model}, Header = model.Title });
+				Plots.Add( new TabItem { Content = new PlotViewModel { Model = model }, Header = model.Title } );
 			}
+		}
+
+		public CompressionResultViewModel( CompressionStats stats ) :
+			this( stats.CompressionResult, stats.LeftBorders, stats.RightBorders, stats.Quantizations, stats.Distributions )
+		{
+
 		}
 	}
 }
