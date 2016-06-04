@@ -787,7 +787,7 @@ int main_sample_extractor_check( )
 	return 0;
 }
 
-int main_complex_compression( )
+int main/*_complex_compression*/( )
 {
 	auto reader = CsvReader( 1024 * 1024, L';' );
 	auto grid = reader.read( L"real_data.csv", false, false );
@@ -808,16 +808,31 @@ int main_complex_compression( )
 	auto qs = quantizer.quantize_grid( grid, errors );
 	//auto time = timer.stop( );
 
-	EmptyOutputStream stream;
+	/*auto empirical = FastEmpiricalDistribution( grid, 0, DetailedApproximationMethod::gauss_kernel( SampleExtractor( ).extract_sample( 0, grid ) ) );
+	auto q0 = Quantizer( qs[0].borders[0], qs[0].borders[qs[0].borders.size( ) - 1] ).quantize( 9, 1e-3, empirical );
 
-	compressor.compress( grid, qs, stream );
+	qs[0] = std::move( q0 );*/
 
-	cout << time << endl;
+	{
+		FileOutputStream stream( L"out.qh" );
+		compressor.compress( grid, qs, stream );
+	}
+
+	pIGrid decompressed;
+
+	{
+		FileInputStream stream( L"out.qh" );
+		decompressed = compressor.decompress( stream );
+	}
+
+	write_grid( "decompressed.csv", decompressed );
+
+	//cout << time << endl;
 
 	return 0;
 }
 
-int main/*_quant_test*/( )
+int main_quant_test( )
 {
 	//auto reader = CsvReader( 1024 * 1024, L';' );
 	//auto grid = reader.read( L"grid.csv", false, false );
