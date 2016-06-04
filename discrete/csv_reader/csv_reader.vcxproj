@@ -22,6 +22,7 @@
     <ProjectGuid>{859315A3-F76B-422F-9C78-E2A58223D83E}</ProjectGuid>
     <RootNamespace>csv_reader</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <ProjectName>csv_io</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -124,12 +125,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CsvReader.h" />
+    <ClInclude Include="CsvWriter.h" />
     <ClInclude Include="IGridReader.h" />
+    <ClInclude Include="IGridWriter.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Include\RoughGrid.cpp" />
     <ClCompile Include="..\..\Include\RoughMetadata.cpp" />
     <ClCompile Include="CsvReader.cpp" />
+    <ClCompile Include="CsvWriter.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

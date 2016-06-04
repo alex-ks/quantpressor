@@ -16,9 +16,9 @@ namespace quantpressor
 
 			std::FILE *file;
 			byte buffered_bits;
-			int buffered_bits_count;
+			int buffered_bits_count = 0;
 			byte *buffered_bytes;
-			unsigned int buffered_count, next_unread;
+			unsigned int buffered_count = 0, next_unread = 0;
 			bool eof = false;
 			ull position;
 

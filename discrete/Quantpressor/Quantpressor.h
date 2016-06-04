@@ -144,5 +144,12 @@ namespace Quantpressor
 					 bool hasRowNames,
 					 bool hasColumnNames );
 	};
+
+	public interface class IGridWriter : public IDisposable
+	{
+	public:
+		void Write( System::String ^fileName,
+					IGrid ^grid );
+	};
 }
 

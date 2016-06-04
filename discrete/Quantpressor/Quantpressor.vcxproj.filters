@@ -48,6 +48,9 @@
     <ClInclude Include="NativeCompressorWrapper.h">
       <Filter>Compressors</Filter>
     </ClInclude>
+    <ClInclude Include="CsvGridWriter.h">
+      <Filter>FileIO</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
@@ -77,6 +80,9 @@
     </ClCompile>
     <ClCompile Include="NativeCompressorWrapper.cpp">
       <Filter>Compressors</Filter>
+    </ClCompile>
+    <ClCompile Include="CsvGridWriter.cpp">
+      <Filter>FileIO</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

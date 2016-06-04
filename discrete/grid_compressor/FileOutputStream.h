@@ -16,7 +16,7 @@ namespace quantpressor
 
 			std::FILE *file;
 			byte buffered_bits;
-			int buffered_bits_count;
+			int buffered_bits_count = 0;
 			std::string buffered_bytes;
 			ull position;
 

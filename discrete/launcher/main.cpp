@@ -157,6 +157,7 @@ int main_distr_replicate( )
 }
 
 #include <CsvReader.h>
+#include <CsvWriter.h>
 
 int main_read( )
 {
@@ -813,19 +814,20 @@ int main/*_complex_compression*/( )
 
 	qs[0] = std::move( q0 );*/
 
-	{
+	/*{
 		FileOutputStream stream( L"out.qh" );
 		compressor.compress( grid, qs, stream );
 	}
-
+*/
 	pIGrid decompressed;
 
 	{
-		FileInputStream stream( L"out.qh" );
+		FileInputStream stream( L"real_data.qhc" );
 		decompressed = compressor.decompress( stream );
 	}
 
-	write_grid( "decompressed.csv", decompressed );
+	auto writer = CsvWriter( L';' );
+	writer.write( L"decompressed.csv", decompressed );
 
 	//cout << time << endl;
 

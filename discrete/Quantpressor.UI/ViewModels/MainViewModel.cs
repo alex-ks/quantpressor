@@ -185,7 +185,7 @@ namespace Quantpressor.UI.ViewModels
 			var openFileDialog = new OpenFileDialog
 			{
 				Filter = $"Quantized huffman-encoded file|*.{Properties.Resources.HuffmanCodeExt}|" +
-						 $"Quantized LZ77-encoded file|*.{Properties.Resources.Lz77Ext}" +
+						 $"Quantized LZ77-encoded file|*.{Properties.Resources.Lz77Ext}|" +
 						 $"Quantized arithmetic-encoded file|*.{Properties.Resources.ArithmeticCodeExt}",
 				ValidateNames = true
 			};
@@ -207,6 +207,8 @@ namespace Quantpressor.UI.ViewModels
 					if ( dialog.ShowDialog( ) != true )
 						return;
 
+					var path = dialog.FileName;
+
 					var ext = Path.GetExtension( openFileDialog.FileName );
 
 					ICompressor compressor;
@@ -218,9 +220,12 @@ namespace Quantpressor.UI.ViewModels
 					else
 					{ compressor = new HuffmanCompressor( ); }
 
-					//var grid = compressor.Decompress( input );
+					var grid = await Task<IGrid>.Factory.StartNew( ( ) => compressor.Decompress( input ) );
+					var writer = new CsvGridWriter( ';' );
 
-					throw new NotImplementedException( "Csv writing is not implemented!" );
+					await Task.Factory.StartNew( ( ) => writer.Write( path, grid ) );
+
+					MessageBox.Show( "Done.", "Info", MessageBoxButton.OK, MessageBoxImage.Information );
 				}
 			}
 			catch ( Exception e )
